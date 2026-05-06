@@ -1,0 +1,32 @@
+# Prompt template for MuSiQue (bdsaglam/musique) multi-hop QA.
+#
+# Open-book multi-hop QA over 20 paragraphs, answer is a short noun phrase
+# requiring composition of facts from 2-4 supporting paragraphs.
+#
+# Variables (user): {paragraphs}, {question}
+
+system: |
+  You are a helpful assistant. Answer the question using only information
+  stated in the provided passages. The answer requires combining information
+  from multiple passages — think step by step before answering. At the end of
+  your answer, write only the final short answer (a name, date, place, or
+  short noun phrase) inside an <answer>$ANSWER</answer> tag.
+
+  Example format:
+  Passage [3] says X. Passage [11] says Y. Combining these, the answer is Z.
+  <answer>Z</answer>
+
+user: |
+  The following are passages that may or may not be relevant to the question:
+
+  {paragraphs}
+
+  Question: {question}
+
+# Template for each retrieved passage. Variables: {index}, {title}, {content}
+passage: |
+  [{index}] {title}
+  {content}
+
+# Separator between passages.
+passage_separator: "\n\n"

@@ -1,0 +1,25 @@
+# Prompt template for BABILong (RMT-team/babilong) free-form QA.
+#
+# bAbI-style supporting-fact reasoning over a short story. Answers are
+# typically a single noun (a name, place, or object). We ask the model to
+# reason step by step and place the final short answer inside <answer>…</answer>
+# tags, matching the convention used by MedRAG / LongBench-v2 in this repo.
+#
+# Variables (user): {story}, {question}
+
+system: |
+  You are a helpful assistant. Read the given story carefully and answer the
+  question using only the information stated in the story. Think step by step
+  before answering. At the end of your answer, write only the final short
+  answer (a single word or short noun phrase) inside an
+  <answer>$ANSWER</answer> tag.
+
+  Example format:
+  Mary went to the kitchen. ... Therefore the football is in the kitchen.
+  <answer>kitchen</answer>
+
+user: |
+  Story:
+  {story}
+
+  Question: {question}

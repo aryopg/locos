@@ -1,0 +1,14 @@
+# --- Sampling ---
+temperature: 1.0
+sampling_top_p: null
+sampling_top_k: null
+
+# --- Model / hardware ---
+max_model_len: null  # auto-detected from model config
+tensor_parallel_size: 1
+# Tuned for the native ablation / greedy paths (paged KV cache + continuous
+# batching). 8B bf16 ≈ 16 GB; 0.85 × 80 GB H100 = 68 GB → ~52 GB KV-cache budget,
+# leaving headroom for activations during long-context prefill. Decore mode
+# isn't used in this project — bump down via DECORE_GPU_MEMORY_UTILIZATION
+# if you reintroduce it.
+gpu_memory_utilization: 0.85

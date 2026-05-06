@@ -1,0 +1,30 @@
+# Prompt template for LongBench-v2 long-context MCQ evaluation.
+#
+# Combines the official THUDM template (<text> wrapping, choice format) with
+# chain-of-thought reasoning and <answer> tag extraction (MedRAG pattern).
+#
+# Variables (user): {context}, {question}, {choice_A}, {choice_B}, {choice_C}, {choice_D}
+
+system: |
+  You are a helpful assistant. Read the given text carefully and answer the
+  multiple choice question. Think step by step before answering. At the end
+  of your answer, write only the letter of the correct answer in
+  <answer>$LETTER</answer> tag, where $LETTER is A, B, C, or D.
+
+  Example format:
+  Based on the text... The answer is most likely B because...
+  <answer>B</answer>
+
+user: |
+  Please read the following text and answer the question below.
+
+  <text>
+  {context}
+  </text>
+
+  What is the correct answer to this question: {question}
+  Choices:
+  (A) {choice_A}
+  (B) {choice_B}
+  (C) {choice_C}
+  (D) {choice_D}

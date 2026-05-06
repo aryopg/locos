@@ -1,0 +1,20 @@
+# Default sampling parameters applied to all models unless overridden
+# by a model-specific config or CLI arguments.
+#
+# To create a model-specific config, copy this file to:
+#   {ModelName}.yaml
+# e.g. Meta-Llama-3-8B-Instruct.yaml, Qwen3-32B.yaml
+#
+# The filename should match the part after the "/" in the HuggingFace
+# model name.  CLI arguments always take priority over these values.
+
+# --- Sampling ---
+max_tokens: 8192
+temperature: 1.0
+sampling_top_p: 0.95
+sampling_top_k: 64
+
+# --- Model / hardware ---
+# max_model_len: null  # auto-detected from model config
+# tensor_parallel_size: 1
+# gpu_memory_utilization: 0.5

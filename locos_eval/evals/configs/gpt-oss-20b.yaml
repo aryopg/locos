@@ -1,0 +1,13 @@
+# --- Sampling ---
+temperature: 1.0
+sampling_top_p: null
+sampling_top_k: null
+
+# --- Model / hardware ---
+max_model_len: null
+tensor_parallel_size: 2
+# Tuned for the native ablation / greedy paths (paged KV cache + continuous
+# batching). 20B / TP=2 ≈ 20 GB per rank; 0.80 × 80 GB H100 = 64 GB total
+# → ~44 GB KV-cache + activation budget per rank. Decore mode isn't used
+# in this project.
+gpu_memory_utilization: 0.80

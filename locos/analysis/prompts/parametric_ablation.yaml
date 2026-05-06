@@ -1,0 +1,22 @@
+# Prompt for parametric/arithmetic ablation control experiment.
+# Few-shot examples constrain the model to short, exact answers.
+
+system: |
+  Answer the following question in less than 10 words.
+  Give only the answer, nothing else.
+
+# Few-shot examples as (user, assistant) pairs.
+# Cover all three sources so the model sees the expected format.
+examples:
+  - user: "Which country does Brighton belong to?"
+    assistant: "United Kingdom"
+  - user: "Which nation uses the USD as its official currency?"
+    assistant: "United States of America"
+  - user: "Who wrote Romeo and Juliet?"
+    assistant: "William Shakespeare"
+  - user: "9+3"
+    assistant: "12"
+
+# Template for the user message.
+# Variables: {question}
+user: "{question}"
