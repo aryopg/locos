@@ -11,7 +11,7 @@ Usage:
 
     # Explicit per-file mode
     python scripts/eval/plot_medrag_bar.py \
-        --decore results_decore.jsonl \
+        --ablation results_ablation.jsonl \
         --greedy results_greedy.jsonl \
         --out figures/medrag_bar.svg
 """
@@ -322,7 +322,7 @@ def main():
     )
 
     # Explicit file mode
-    parser.add_argument("--decore", default=None, help="Path to DeCoRe results JSONL")
+    parser.add_argument("--ablation", default=None, help="Path to LOCOS ablation results JSONL")
     parser.add_argument("--greedy", default=None, help="Path to Greedy results JSONL")
 
     parser.add_argument(
@@ -334,8 +334,8 @@ def main():
     parser.add_argument(
         "--labels",
         nargs="+",
-        default=["DeCoRe", "Greedy"],
-        help="Legend labels (default: DeCoRe Greedy)",
+        default=["LOCOS", "Greedy"],
+        help="Legend labels (default: LOCOS Greedy)",
     )
     parser.add_argument(
         "--out",
@@ -373,18 +373,18 @@ def main():
             out_path = out_dir / f"medrag_bar_{model_name}{out_suffix}"
             make_bar_plot(runs, labels, out_path, model_name=model_name)
 
-    elif args.decore is not None and args.greedy is not None:
-        decore_acc = load_accuracy_by_subdataset(args.decore)
+    elif args.ablation is not None and args.greedy is not None:
+        ablation_acc = load_accuracy_by_subdataset(args.ablation)
         greedy_acc = load_accuracy_by_subdataset(args.greedy)
 
-        runs = [decore_acc, greedy_acc]
+        runs = [ablation_acc, greedy_acc]
         labels = args.labels[:2]
 
         print_comparison(runs, labels)
         make_bar_plot(runs, labels, Path(args.out))
 
     else:
-        parser.error("Provide either --results-dir or both --decore and --greedy")
+        parser.error("Provide either --results-dir or both --ablation and --greedy")
 
 
 if __name__ == "__main__":

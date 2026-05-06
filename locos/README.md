@@ -4,7 +4,7 @@ Standalone toolkit for identifying **retrieval heads** in transformer language
 models — attention heads that are disproportionately responsible for copying
 information from context into the model's predictions.
 
-Detected heads are saved as JSON files consumed by DeCoRe's contrastive
+Detected heads are saved as JSON files consumed by LOCOS's ablation
 decoding (`locos_eval`).
 
 ## Detection Methods

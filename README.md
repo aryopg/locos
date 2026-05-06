@@ -309,8 +309,8 @@ Runs are checkpointed per-sample and auto-resume on restart.
 source .venv/bin/activate && pytest tests/ -v -m "not gpu"
 
 # GPU integration tests
-DECORE_TEST_MODEL=meta-llama/Meta-Llama-3-8B-Instruct \
-DECORE_HEADS_JSON=retrieval_heads/Meta-Llama-3-8B-Instruct.json \
+TEST_MODEL=meta-llama/Meta-Llama-3-8B-Instruct \
+HEADS_JSON=retrieval_heads/Meta-Llama-3-8B-Instruct.json \
 pytest tests/ -v -m gpu
 ```
 

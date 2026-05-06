@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shared infrastructure helpers for all job launchers.
-# Sourced by launch_evals.sh, launch_multi_ns.sh, etc.
+# Sourced by local experiment job scripts.
 #
 # Contains: docker image, model registry, GPU counts, setup commands,
 # and a generic job-command builder. Eval-specific code lives in
@@ -14,7 +14,7 @@ DOCKER_IMAGE="runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404"
 # HF_RESULTS_REPO holds heads files, detection JSONs, ablation analyses, and job
 # logs (everything except downstream eval results). Stable target — the broken
 # native-ablation runs from before the eager-mode fix did NOT pollute it.
-HF_RESULTS_REPO="${HF_RESULTS_REPO:-aryopg/decore-results}"
+HF_RESULTS_REPO="${HF_RESULTS_REPO:-aryopg/locos-results}"
 # HF_DOWNSTREAM_REPO holds task-level eval outputs (NQ-Swap, MuSiQue, MedRAG,
 # LongBench-v2, BABILong, ACI-Bench, XSum). Split out from HF_RESULTS_REPO so
 # that re-runs after the enforce_eager fix start fresh and the broken
@@ -85,8 +85,8 @@ model_slug() {
     echo "$1" | tr '/' '_'
 }
 
-# DNS-safe lowercase slug for kblaunch job names only (NOT for directory paths).
-# Strips -Instruct/-it suffixes to stay within Kubernetes 63-char pod name limit.
+# DNS-safe lowercase slug for short job labels only (NOT for directory paths).
+# Strips -Instruct/-it suffixes to keep labels compact.
 # "meta-llama/Meta-Llama-3-8B-Instruct" → "meta-llama-3-8b"
 # "google/gemma-3-4b-it" → "gemma-3-4b"
 job_slug() {
@@ -103,7 +103,7 @@ heads_path() {
 }
 
 # Short slug for HEADS_METHOD / HEADS_LABEL, used in job names to stay under
-# the Kubernetes 63-character limit.
+# short label limits used by external schedulers.
 method_job_slug() {
     case "$1" in
         wu_niah)        echo "wn" ;;
@@ -126,7 +126,7 @@ task_names_for_script() {
     local envs=("$@")
 
     # Parse EXTRA_ENVS into local variables
-    local DECODING="decore" TOP_K="5" LENGTH="short"
+    local DECODING="ablation" TOP_K="5" LENGTH="short"
     local DATASETS="mmlu_med medqa supergpqa_med"
     for env_pair in "${envs[@]+"${envs[@]}"}"; do
         case "$env_pair" in
@@ -176,9 +176,9 @@ set -euo pipefail
 # Install system dependencies
 apt-get update -qq && apt-get install -y -qq nano byobu htop nvtop jq rsync sqlite3 libsqlite3-dev > /dev/null 2>&1
 
-# Some EIDF namespaces (e.g. eidf029ns) mount /workspace/.cache read-only,
-# which breaks uv/pip/HF default cache locations under $HOME/.cache.
-# Redirect cache roots to a sibling path that lives on the writable /workspace
+# Some shared GPU hosts mount /workspace/.cache read-only, which breaks
+# uv/pip/HF default cache locations under $HOME/.cache.
+# Redirect cache roots to a sibling path that lives on a writable /workspace
 # mount; fall back to /tmp if /workspace itself is locked down. Set the HF
 # variables explicitly because the base image may already define them, which
 # takes precedence over XDG_CACHE_HOME in huggingface_hub.
@@ -200,7 +200,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
 
 # Clone and install
-git clone --depth 1 https://${GIT_TOKEN}@github.com/aryopg/locos_eval.git
+git clone --depth 1 https://${GIT_TOKEN}@github.com/aryopg/locos.git
 cd locos_eval
 uv venv --python python3.12 --system-site-packages
 UV_HTTP_TIMEOUT=300 uv pip install -e ".[dev,eval]" \
@@ -255,9 +255,9 @@ export PYTHONUNBUFFERED=1
 $(for env_pair in "$@"; do echo "export ${env_pair}"; done)
 
 # --- Log capture ---
-LOG_DIR="/tmp/decore-logs"
+LOG_DIR="/tmp/locos-logs"
 mkdir -p "\$LOG_DIR"
-LOG_FILE="\${LOG_DIR}/decore-${jslug}-${script_name}.log"
+LOG_FILE="\${LOG_DIR}/locos-${jslug}-${script_name}.log"
 exec > >(stdbuf -oL tee -a "\$LOG_FILE") 2>&1
 
 # --- Job script: ${script_name} ---

@@ -54,12 +54,12 @@ ALL_DATASETS=(mmlu_med medqa medmcqa pubmedqa supergpqa_med)
 
 # Decoding variants: "label:decoding_mode:heads_suffix"
 #   - label: used for --heads-label (empty = auto-infer)
-#   - decoding_mode: greedy or decore
+#   - decoding_mode: greedy or ablation
 #   - heads_suffix: appended to model name for heads file (e.g. "_wu_niah", "_wu_nolima")
 VARIANTS=(
     ":greedy:"
-    "wu_niah:decore:_wu_niah"
-    "wu_nolima:decore:_wu_nolima"
+    "wu_niah:ablation:_wu_niah"
+    "wu_nolima:ablation:_wu_nolima"
 )
 
 # Number of retrieved passages to include
@@ -129,7 +129,7 @@ echo "========================================"
 echo "Models:    ${#MODELS[@]}"
 echo "Datasets:  ${DATASETS[*]}"
 echo "Top-k:     ${TOP_KS[*]}"
-echo "Variants:  ${#VARIANTS[@]} (greedy, decore_wu_niah, decore_wu_nolima)"
+echo "Variants:  ${#VARIANTS[@]} (greedy, ablation_wu_niah, ablation_wu_nolima)"
 [[ -n "$LIMIT" ]] && echo "Limit:     ${LIMIT} samples"
 echo "========================================"
 echo ""
@@ -144,7 +144,7 @@ for model in "${MODELS[@]}"; do
         # Build heads path (not needed for greedy)
         heads_flag=""
         heads_label_flag=""
-        if [[ "$decoding" == "decore" ]]; then
+        if [[ "$decoding" == "ablation" ]]; then
             hpath=$(heads_path "$model" "$heads_suffix")
             if [[ ! -f "$hpath" ]]; then
                 echo "[SKIP] ${short} / ${decoding}_${label}: heads file not found: ${hpath}"
@@ -155,7 +155,7 @@ for model in "${MODELS[@]}"; do
             [[ -n "$label" ]] && heads_label_flag="--heads-label ${label}"
         fi
 
-        # Display name: "greedy" or "decore_wu_niah" / "decore_wu_nolima"
+        # Display name: "greedy" or "ablation_wu_niah" / "ablation_wu_nolima"
         if [[ -n "$label" ]]; then
             display_variant="${decoding}_${label}"
         else

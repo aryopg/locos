@@ -8,8 +8,8 @@ Run unit tests (no GPU needed):
     source .venv/bin/activate && pytest tests/ -v -m "not gpu"
 
 Run GPU integration tests (requires GPU server):
-    DECORE_TEST_MODEL=meta-llama/Meta-Llama-3-8B-Instruct \
-    DECORE_HEADS_JSON=retrieval_heads/Meta-Llama-3-8B-Instruct.json \
+    TEST_MODEL=meta-llama/Meta-Llama-3-8B-Instruct \
+    HEADS_JSON=retrieval_heads/Meta-Llama-3-8B-Instruct.json \
     pytest tests/ -v -m gpu
 
 Install (local, macOS):
@@ -43,7 +43,7 @@ This repository contains two packages:
 
 ### Wrapper API (wrapper.py)
 
-  decore(llm, heads=..., decoding="greedy"|"ablation") → GreedyWrapper | AblationWrapper | AblationRPCWrapper
+  ablation(llm, heads=..., decoding="greedy"|"ablation") → GreedyWrapper | AblationWrapper | AblationRPCWrapper
   - Accepts existing vLLM LLM instance
   - decoding="greedy": uses vLLM's native generation (no patching)
   - decoding="ablation" + TP=1: AblationWrapper (native q-zero patch via ablation.py hooks)
@@ -66,7 +66,7 @@ This repository contains two packages:
 
 ### State (state.py)
 
-  DeCoreState tracks active/masked_pass_active flags, retrieval head config, and two
+  AblationState tracks active/masked_pass_active flags, retrieval head config, and two
   independent sequential KV caches (_base_kv, _masked_kv). Used by attention.py tests.
 
 ### Multi-GPU ablation (rpc_ops.py)
@@ -108,15 +108,9 @@ This repository contains two packages:
   Run: python -m locos_eval.evals.tasks.<task> --model ... --heads ... --tp 4
 
 Deploy infrastructure (deploy/):
-  Multi-namespace Kubernetes job launcher for EIDF cluster.
-  - launch_multi_ns.sh: generic launcher for any job script across namespaces
-    with round-robin scheduling, GPU quota management, SSH ControlMaster,
-    --dry-run preview, --connect/--disconnect for SSH sessions
-  - job_config.sh: shared model registry (MODEL_SHORT → HF name) and GPU count helpers
-  - namespaces.conf: TSV config of namespace → SSH host → GPU quota
-  - generate_experiments.py: enumerate (task × model × decoding × seed) matrix,
-    generate launch commands. Supports greedy and ablation_* decodings only.
-    --dry-run, --decodings, --models, --tasks filters
+  Local experiment job helpers.
+  - job_config.sh: shared model registry (MODEL_SHORT → HF name), GPU count helpers,
+    and reusable setup commands
   - model_sampling.yaml: per-model recommended sampling parameters for stochastic runs
   - jobs/: per-task/detector shell scripts (eval_nq_swap.sh, eval_medrag.sh,
     eval_xsum.sh, eval_aci_bench.sh, eval_longbench_v2.sh, detect_retrieval_heads.sh,
@@ -237,7 +231,7 @@ vLLM v0.18 attribute changes in LlamaAttention/Gemma3Attention:
 ## Data & results
 
 Retrieval heads JSON files, detection outputs, and ablation analyses live on
-HuggingFace Hub at `aryopg/decore-results` (`HF_RESULTS_REPO`).
+HuggingFace Hub at `aryopg/locos-results` (`HF_RESULTS_REPO`).
 Downstream eval results (NQ-Swap, MuSiQue, MedRAG, LongBench-v2, BABILong,
 ACI-Bench, XSum) live on a separate repo, `aryopg/locos_downstream_results`
 (`HF_DOWNSTREAM_REPO`). Use `scripts/download_heads.py` to fetch heads

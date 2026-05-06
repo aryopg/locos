@@ -13,7 +13,7 @@ Usage:
     python locos/plotting/locos_niah_vs_nolima.py \
         --models Qwen3-8B Qwen3-14B Qwen3-32B \
                  gemma-3-12b-it gemma-3-27b-it Olmo-3.1-32B-Instruct \
-        --results-dir /path/to/decore-results/ablation_results \
+        --results-dir /path/to/locos-results/ablation_results \
         --ablation-mode mean \
         --out-dir figures/locos_niah_vs_nolima
 

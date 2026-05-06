@@ -294,9 +294,9 @@ class TestEvalRunner:
             self._make_runner(limit=0)
 
     def test_kwargs_stored(self):
-        """Extra kwargs are stored for passing to decore()."""
+        """Extra kwargs are stored for passing to ablation()."""
         runner = self._make_runner(decoding="greedy")
-        assert runner._decore_kwargs["decoding"] == "greedy"
+        assert runner._ablation_kwargs["decoding"] == "greedy"
 
     def test_heads_required_for_ablation_mode(self):
         """ablation decoding mode requires --heads."""
@@ -606,7 +606,7 @@ class TestAblationMode:
     def test_runner_accepts_ablation_decoding(self):
         """Runner should accept --decoding ablation with a heads file."""
         runner = self._make_runner(decoding="ablation")
-        assert runner._decore_kwargs["decoding"] == "ablation"
+        assert runner._ablation_kwargs["decoding"] == "ablation"
 
     def test_runner_ablation_requires_heads(self):
         """Ablation mode without heads should raise."""
@@ -678,7 +678,7 @@ class TestSamplingSeed:
     def test_sampling_seed_in_config_sidecar(self):
         runner = self._make_runner(decoding="greedy", heads=None, sampling_seed=3)
         # The config dict is built inside run(), but we can verify the kwarg is stored
-        assert runner._decore_kwargs.get("sampling_seed") == 3
+        assert runner._ablation_kwargs.get("sampling_seed") == 3
 
 
 # ---------------------------------------------------------------------------

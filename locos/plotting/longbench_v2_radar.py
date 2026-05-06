@@ -12,7 +12,7 @@ written to a sibling CSV for downstream use (e.g. bar plot with error bars).
 
 Usage:
     python locos/plotting/longbench_v2_radar.py \
-        --results-root /Users/aryopg/Documents/school/phd/decore-results/downstream_results \
+        --results-root /Users/aryopg/Documents/school/phd/locos-results/downstream_results \
         --task longbench_v2_short \
         --out figures/longbench_v2_radar.svg
 """
@@ -352,7 +352,7 @@ def main() -> None:
     parser.add_argument(
         "--results-root",
         type=Path,
-        default=Path("/Users/aryopg/Documents/school/phd/decore-results/downstream_results"),
+        default=Path("/Users/aryopg/Documents/school/phd/locos-results/downstream_results"),
         help="Root directory holding downstream eval results.",
     )
     parser.add_argument(

@@ -3,13 +3,13 @@ from .wrapper import (
     AblationRPCWrapper,
     AblationWrapper,
     GreedyWrapper,
-    decore,
+    ablation,
 )
 
 __all__ = [
     "AblationRPCWrapper",
     "AblationWrapper",
     "GreedyWrapper",
-    "decore",
+    "ablation",
     "load_retrieval_heads",
 ]

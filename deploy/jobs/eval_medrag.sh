@@ -2,7 +2,7 @@
 # Eval: MedRAG medical QA (5 sub-datasets, MCQ accuracy)
 set -euo pipefail
 
-DECODING="${DECODING:-decore}"
+DECODING="${DECODING:-ablation}"
 ABLATION_MODE="${ABLATION_MODE:-zero}"
 DATASETS="${DATASETS:-mmlu_med medqa supergpqa_med}"
 TOP_K="${TOP_K:-5}"
@@ -43,18 +43,18 @@ for ds in ${DATASETS}; do
         fi
     fi
 
-    DECORE_MODEL="${MODEL}" \
-    DECORE_HEADS_JSON="${HEADS}" \
-    DECORE_DECODING="${DECODING}" \
-    DECORE_ABLATION_MODE="${ABLATION_MODE}" \
-    DECORE_MAX_MODEL_LEN="${MAX_MODEL_LEN:-16384}" \
-    DECORE_TENSOR_PARALLEL_SIZE="${GPUS}" \
-    DECORE_TEMPERATURE="${TEMPERATURE:-0.0}" \
-    DECORE_TOP_P="${TOP_P:-1.0}" \
-    DECORE_TOP_K_SAMPLING="${TOP_K_SAMPLING:--1}" \
-    DECORE_SAMPLING_SEED="${SAMPLING_SEED:-}" \
-    DECORE_HEADS_LABEL="${HEADS_LABEL:-}" \
-    DECORE_OUTPUT_DIR="${OUTPUT_DIR}" \
+    MODEL="${MODEL}" \
+    HEADS_JSON="${HEADS}" \
+    DECODING="${DECODING}" \
+    ABLATION_MODE="${ABLATION_MODE}" \
+    MAX_MODEL_LEN="${MAX_MODEL_LEN:-16384}" \
+    TENSOR_PARALLEL_SIZE="${GPUS}" \
+    TEMPERATURE="${TEMPERATURE:-0.0}" \
+    TOP_P="${TOP_P:-1.0}" \
+    TOP_K_SAMPLING="${TOP_K_SAMPLING:--1}" \
+    SAMPLING_SEED="${SAMPLING_SEED:-}" \
+    HEADS_LABEL="${HEADS_LABEL:-}" \
+    OUTPUT_DIR="${OUTPUT_DIR}" \
     ./scripts/eval/run_eval.sh medrag_task --dataset-name "${ds}" --top-k "${TOP_K}" ${LIMIT:+--limit $LIMIT}
 
     # Sync after each sub-dataset (partial results survive pod failures)

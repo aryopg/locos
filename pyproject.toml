@@ -3,12 +3,12 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "decore-vllm"
+name = "locos"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     # Pinned to cu12-compatible releases. torch>=2.11 and vllm>=0.19 ship
-    # cu13 wheels by default, which fail on the EIDF cluster (CUDA 12.8).
+    # cu13 wheels by default, while this project targets CUDA 12.x wheels.
     # vllm 0.18.x requires torch==2.10.0; upper bound raised to allow 2.10.x.
     # Install with: --extra-index-url https://download.pytorch.org/whl/cu128
     "vllm>=0.18,<0.19",

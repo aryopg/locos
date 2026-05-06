@@ -1,1 +1,1 @@
-"""DeCoRe evaluation framework."""
+"""LOCOS evaluation framework."""

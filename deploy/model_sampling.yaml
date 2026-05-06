@@ -1,5 +1,5 @@
 # Per-model recommended sampling parameters for stochastic decoding runs.
-# Used by deploy/generate_experiments.py when generating experiment launch commands.
+# Shared by local experiment and evaluation scripts.
 # These are the model author's suggested defaults for open-ended generation.
 # Deterministic greedy (temperature=0) is NOT used — all runs are stochastic (Option C).
 #

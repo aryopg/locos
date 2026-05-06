@@ -23,7 +23,7 @@ def upload_results(
 
     Args:
         local_dir: Path to the directory to upload.
-        repo_id: HF Hub repo (e.g. ``"aryopg/decore-results"``).
+        repo_id: HF Hub repo (e.g. ``"aryopg/locos-results"``).
         path_in_repo: Subfolder inside the repo. Defaults to the local
             directory name.
         repo_type: One of ``"dataset"``, ``"model"``, ``"space"``.

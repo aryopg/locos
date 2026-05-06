@@ -239,7 +239,7 @@ def find_needle_idx_from_tokens(prompt_ids: torch.Tensor, needle_ids: list[int])
 # ---------------------------------------------------------------------------
 
 
-_CHAT_SENTINEL = "\u0001DECORE_NEEDLE_SENTINEL\u0001"
+_CHAT_SENTINEL = "\u0001NEEDLE_SENTINEL\u0001"
 
 
 def _split_chat_template(tokenizer, disable_thinking: bool = True) -> tuple[str, str] | None:

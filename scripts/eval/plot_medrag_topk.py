@@ -4,7 +4,7 @@
 Discovers results from the structured output directory layout produced by
 EvalRunner (``{output_dir}/medrag_{dataset}_top{k}/{model}/{variant}/``).
 Generates one plot per (model, sub-dataset) pair, with each line representing
-a decoding variant (greedy, decore_wu_niah, decore_wu_nolima, etc.).
+a decoding variant (greedy, locos_wu_niah, locos_wu_nolima, etc.).
 
 Usage:
     # Auto-discover all models and sub-datasets
@@ -48,11 +48,11 @@ SUBDATASET_LABELS = {
 
 VARIANT_LABELS = {
     "greedy": "Greedy",
-    "decore_wu_niah": "DeCoRe (Wu NIAH)",
-    "decore_wu_nolima": "DeCoRe (Wu NoLiMa)",
-    "decore_logitcontrib_nolima": "DeCoRe (LogitContrib NoLiMa)",
-    "decore_ori": "DeCoRe (Ori)",
-    "decore_cri": "DeCoRe (CRI)",
+    "locos_wu_niah": "LOCOS (Wu NIAH)",
+    "locos_wu_nolima": "LOCOS (Wu NoLiMa)",
+    "locos_logitcontrib_nolima": "LOCOS (LogitContrib NoLiMa)",
+    "locos_ori": "LOCOS (Ori)",
+    "locos_cri": "LOCOS (CRI)",
     "ablation_wu_niah": "Ablation (Wu NIAH)",
     "ablation_wu_nolima": "Ablation (Wu NoLiMa)",
     "ablation_logitcontrib_nolima": "Ablation (LogitContrib NoLiMa)",

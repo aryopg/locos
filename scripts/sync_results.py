@@ -7,10 +7,10 @@ huggingface_hub for uploads.
 
 Usage::
 
-    python scripts/sync_results.py --repo-id aryopg/decore-eval-results
-    python scripts/sync_results.py --repo-id aryopg/decore-eval-results --dry-run
-    python scripts/sync_results.py --repo-id aryopg/decore-eval-results --local-dir ./eval_results
-    python scripts/sync_results.py --repo-id aryopg/decore-eval-results --rebuild
+    python scripts/sync_results.py --repo-id aryopg/locos-results
+    python scripts/sync_results.py --repo-id aryopg/locos-results --dry-run
+    python scripts/sync_results.py --repo-id aryopg/locos-results --local-dir ./eval_results
+    python scripts/sync_results.py --repo-id aryopg/locos-results --rebuild
 """
 
 from __future__ import annotations
@@ -388,7 +388,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--repo-id",
         required=True,
-        help="HuggingFace dataset repo (e.g. aryopg/decore-eval-results)",
+        help="HuggingFace dataset repo (e.g. aryopg/locos-results)",
     )
     parser.add_argument(
         "--local-dir",

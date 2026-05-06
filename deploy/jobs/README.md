@@ -1,36 +1,29 @@
 # Job Scripts
 
 Bash scripts that define individual experiments. Each script runs inside a
-Kubernetes pod after the repo is cloned and the venv is activated.
+prepared checkout after the environment variables below have been set.
 
 ## How it works
 
-The launcher (`launch_multi_ns.sh`) wraps each script with log capture and
-uploads logs automatically. Scripts only need to run the experiment and upload
-their own result artifacts.
+Scripts only need to run the experiment and upload their own result artifacts.
+They can be invoked directly from the repository root on a local machine or any
+GPU host with the project environment activated.
 
 ## Environment variables
 
 The launcher exports these before running your script:
 
 | Variable | Description |
-|---|---|
+| --- | --- |
 | `MODEL` | HuggingFace model name (e.g., `meta-llama/Meta-Llama-3-8B-Instruct`) |
 | `HEADS` | Retrieval heads JSON path relative to repo root |
 | `GPUS` | Number of GPUs allocated (equals TP size) |
 | `MODEL_SLUG` | Short model name for paths (e.g., `meta-llama-3-8b-instruct`) |
 | `HF_RESULTS_REPO` | HuggingFace repo for uploading results |
 
-Additional variables can be passed via `--env KEY=VALUE` on the launcher CLI.
-
-Per-namespace settings (SSH host, GPU product, secrets, username) are
-configured in `deploy/namespaces.conf`.
-
-> **WARNING: Pods are ephemeral.** When a script exits (or crashes), the pod
-> is killed and all local storage is destroyed. Every artifact you care about
-> **must be uploaded before the script exits**. If a script fails midway,
-> intermediate results are lost unless you explicitly checkpoint and upload
-> during execution.
+Set any script-specific variables in the shell before invoking the script.
+Large result directories should be uploaded or copied before cleaning the
+workspace.
 
 ## Template
 
@@ -52,7 +45,7 @@ python scripts/upload_results.py ./results_dir \
 ## Existing scripts
 
 | Script | Description |
-|---|---|
+| --- | --- |
 | `eval_nq_swap.sh` | NQ-Swap context faithfulness eval (sub_EM, org_EM) |
 | `eval_xsum.sh` | XSum summarization eval (ROUGE-L, BERTScore, FactKB) |
 | `eval_medrag.sh` | MedRAG medical QA eval (5 sub-datasets, MCQ accuracy) |

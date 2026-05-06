@@ -1,4 +1,4 @@
-"""Shared eval runner base class for standalone DeCoRe evaluation tasks.
+"""Shared eval runner base class for standalone LOCOS evaluation tasks.
 
 Handles model loading, chat template formatting, generation loop,
 result I/O, and rich console output. All eval tasks subclass EvalRunner.
@@ -73,7 +73,7 @@ def _start_sample_watchdog(idx, sample, gen_path, timeout_s, runner):
 
         msg = f"[TIMEOUT after {timeout_s:.0f}s on sample {idx}]"
         with contextlib.suppress(Exception):
-            print(f"\n[decore-watchdog] {msg} — dumping tracebacks to stderr", file=sys.stderr, flush=True)
+            print(f"\n[ablation-watchdog] {msg} — dumping tracebacks to stderr", file=sys.stderr, flush=True)
             faulthandler.dump_traceback(file=sys.stderr, all_threads=True)
         with contextlib.suppress(Exception):
             runner._save_generation(gen_path, idx, msg, sample)
@@ -149,7 +149,7 @@ class EvalResult:
 # Base runner
 # ---------------------------------------------------------------------------
 class EvalRunner:
-    """Base class for standalone DeCoRe evaluation tasks.
+    """Base class for standalone LOCOS evaluation tasks.
 
     Subclasses must implement :meth:`load_samples` and :meth:`score`.
     Optionally override :meth:`task_name` and :meth:`system_message`.
@@ -241,7 +241,7 @@ class EvalRunner:
         self._gpu_memory_utilization = gpu_memory_utilization
         self._limit = limit
         self._output_dir = Path(output_dir)
-        self._decore_kwargs = kwargs  # decoding, ablation_mode, num_heads, etc.
+        self._ablation_kwargs = kwargs  # decoding, ablation_mode, num_heads, etc.
 
         # Set by _init_model()
         self._wrapper = None
@@ -253,12 +253,12 @@ class EvalRunner:
         return ExperimentKey(
             task=self.task_name(),
             model=self._model_name,
-            decoding=self._decore_kwargs.get("decoding", "greedy"),
+            decoding=self._ablation_kwargs.get("decoding", "greedy"),
             heads_path=self._heads_path,
-            heads_label=self._decore_kwargs.get("heads_label"),
-            num_heads=self._decore_kwargs.get("num_heads"),
-            random_seed=self._decore_kwargs.get("random_seed", 42),
-            sampling_seed=self._decore_kwargs.get("sampling_seed"),
+            heads_label=self._ablation_kwargs.get("heads_label"),
+            num_heads=self._ablation_kwargs.get("num_heads"),
+            random_seed=self._ablation_kwargs.get("random_seed", 42),
+            sampling_seed=self._ablation_kwargs.get("sampling_seed"),
             ablation_mode=self._ablation_mode,
         )
 
@@ -296,16 +296,16 @@ class EvalRunner:
     # ------------------------------------------------------------------
 
     def _init_model(self) -> None:
-        """Create vLLM LLM, wrap with decore(), and store tokenizer."""
+        """Create vLLM LLM, wrap with ablation(), and store tokenizer."""
         from vllm import LLM
 
-        from locos_eval.wrapper import decore
+        from locos_eval.wrapper import ablation
 
         console.print(
             Panel(
                 f"[bold]Loading model:[/bold] {self._model_name}\n"
                 f"[bold]Heads:[/bold] {self._heads_path or 'N/A (greedy)'}\n"
-                f"[bold]Decoding:[/bold] {self._decore_kwargs.get('decoding', 'greedy')}\n"
+                f"[bold]Decoding:[/bold] {self._ablation_kwargs.get('decoding', 'greedy')}\n"
                 f"[bold]TP:[/bold] {self._tensor_parallel_size}  "
                 f"[bold]Max model len:[/bold] {self._max_model_len or 'auto'}  "
                 f"[bold]GPU mem:[/bold] {self._gpu_memory_utilization}  "
@@ -336,8 +336,8 @@ class EvalRunner:
 
             config = AutoConfig.from_pretrained(self._model_name)
             num_layers, num_attn_heads = _extract_layer_head_counts(config, self._model_name)
-            num_heads_arg = self._decore_kwargs.get("num_heads", 50)
-            seed = self._decore_kwargs.get("random_seed", 42)
+            num_heads_arg = self._ablation_kwargs.get("num_heads", 50)
+            seed = self._ablation_kwargs.get("random_seed", 42)
             heads_arg = generate_random_heads(
                 num_layers=num_layers,
                 num_heads=num_attn_heads,
@@ -346,7 +346,7 @@ class EvalRunner:
             )
             console.print(f"[bold]Random heads:[/bold] {len(heads_arg)} heads (seed={seed})")
 
-        # Filter out runner-only kwargs before passing to decore()
+        # Filter out runner-only kwargs before passing to ablation()
         _runner_only_keys = {
             "heads_label",
             "random_seed",
@@ -354,12 +354,12 @@ class EvalRunner:
             "num_calibration",
             "enforce_eager",
         }
-        decore_kwargs = {k: v for k, v in self._decore_kwargs.items() if k not in _runner_only_keys}
+        ablation_kwargs = {k: v for k, v in self._ablation_kwargs.items() if k not in _runner_only_keys}
 
         # Mean ablation: format calibration prompts now that the tokenizer is
-        # loaded, then hand them to decore() so the wrapper runs the
+        # loaded, then hand them to ablation() so the wrapper runs the
         # calibration pass before installing replacement hooks.
-        if decore_kwargs.get("decoding") == "ablation" and decore_kwargs.get("ablation_mode") == "mean":
+        if ablation_kwargs.get("decoding") == "ablation" and ablation_kwargs.get("ablation_mode") == "mean":
             cal_samples = getattr(self, "_calibration_samples", None)
             if not cal_samples:
                 raise RuntimeError(
@@ -371,12 +371,12 @@ class EvalRunner:
                 f"  [cyan]Mean-ablation calibration: {len(calibration_prompts)} "
                 f"chat-formatted prompts from samples[:{len(calibration_prompts)}][/cyan]"
             )
-            decore_kwargs["calibration_prompts"] = calibration_prompts
+            ablation_kwargs["calibration_prompts"] = calibration_prompts
 
-        self._wrapper = decore(
+        self._wrapper = ablation(
             llm,
             heads=heads_arg,
-            **decore_kwargs,
+            **ablation_kwargs,
         )
 
     # ------------------------------------------------------------------
@@ -537,7 +537,7 @@ class EvalRunner:
                 # which loads the tokenizer first, then formats and runs
                 # calibration before constructing the wrapper.
                 self._calibration_samples = None
-                if self._decore_kwargs.get("decoding") == "ablation" and self._ablation_mode == "mean":
+                if self._ablation_kwargs.get("decoding") == "ablation" and self._ablation_mode == "mean":
                     n_cal = min(self._num_calibration, len(samples))
                     self._calibration_samples = samples[:n_cal]
 
@@ -552,7 +552,7 @@ class EvalRunner:
 
                 outputs: list[str] = [r["output"] for r in existing]
 
-                sampling_seed = self._decore_kwargs.get("sampling_seed")
+                sampling_seed = self._ablation_kwargs.get("sampling_seed")
                 if sampling_seed is not None:
                     import torch
 
@@ -562,8 +562,8 @@ class EvalRunner:
                 # Per-sample watchdog: if a single generate() call hangs (e.g. a deadlocked
                 # collective_rpc on a dead worker), dump tracebacks and hard-exit so the
                 # outer job script can restart and resume from checkpoint instead of
-                # waiting indefinitely. Off by default; opt in with DECORE_SAMPLE_TIMEOUT_S.
-                sample_timeout_s = float(os.environ.get("DECORE_SAMPLE_TIMEOUT_S", "0") or 0)
+                # waiting indefinitely. Off by default; opt in with SAMPLE_TIMEOUT_S.
+                sample_timeout_s = float(os.environ.get("SAMPLE_TIMEOUT_S", "0") or 0)
 
                 remaining = samples[start_idx:]
 
@@ -641,7 +641,7 @@ class EvalRunner:
 
         # Save final results + config sidecar
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        decoding = self._decore_kwargs.get("decoding", "greedy")
+        decoding = self._ablation_kwargs.get("decoding", "greedy")
         run_dir = self._run_dir()
         run_dir.mkdir(parents=True, exist_ok=True)
 
@@ -662,10 +662,10 @@ class EvalRunner:
             "max_model_len": self._max_model_len,
             "tensor_parallel_size": self._tensor_parallel_size,
             "gpu_memory_utilization": self._gpu_memory_utilization,
-            "sampling_seed": self._decore_kwargs.get("sampling_seed"),
+            "sampling_seed": self._ablation_kwargs.get("sampling_seed"),
             "limit": self._limit,
             "timestamp": timestamp,
-            **{k: v for k, v in self._decore_kwargs.items() if k not in ("decoding", "sampling_seed")},
+            **{k: v for k, v in self._ablation_kwargs.items() if k not in ("decoding", "sampling_seed")},
         }
         config_path = run_dir / f"results_{timestamp}_config.json"
         with open(config_path, "w") as f:

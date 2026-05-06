@@ -9,6 +9,6 @@ tensor_parallel_size: 4
 # Tuned for the native ablation / greedy paths (paged KV cache + continuous
 # batching). 120B / TP=4 ≈ 30 GB per rank; 0.80 × 80 GB H100 = 64 GB total
 # → ~34 GB KV-cache + activation budget per rank. More conservative than
-# smaller models because TP=4 has heavier all-reduce traffic. Decore mode
+# smaller models because TP=4 has heavier all-reduce traffic. LOCOS ablation mode
 # isn't used in this project.
 gpu_memory_utilization: 0.80

@@ -1,22 +1,22 @@
 import torch
 
-from locos_eval.state import DeCoreState
+from locos_eval.state import AblationState
 
 
 def test_default_state_is_inactive():
-    state = DeCoreState()
+    state = AblationState()
     assert not state.active
     assert not state.masked_pass_active
 
 
 def test_set_masked_pass():
-    state = DeCoreState()
+    state = AblationState()
     state.masked_pass_active = True
     assert state.masked_pass_active
 
 
 def test_masked_heads_by_layer_returns_empty_list_for_unknown_layer():
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([(0, 1), (0, 3), (2, 5)])
     assert state.masked_heads_for_layer(99) == []
     assert state.masked_heads_for_layer(0) == [1, 3]
@@ -27,12 +27,12 @@ def test_masked_heads_by_layer_returns_empty_list_for_unknown_layer():
 
 
 def test_base_kv_initially_none():
-    state = DeCoreState()
+    state = AblationState()
     assert state.get_base_kv(layer=0) == (None, None)
 
 
 def test_base_kv_update_and_retrieve():
-    state = DeCoreState()
+    state = AblationState()
     k = torch.tensor([[[1.0, 2.0], [3.0, 4.0]]])  # [1, 2, 2]
     v = torch.tensor([[[5.0, 6.0], [7.0, 8.0]]])
     state.update_base_kv(layer=0, k=k, v=v)
@@ -43,7 +43,7 @@ def test_base_kv_update_and_retrieve():
 
 def test_base_kv_append_preserves_values():
     """Appending to KV cache should concatenate along dim 0, preserving all values."""
-    state = DeCoreState()
+    state = AblationState()
     k1 = torch.tensor([[[1.0, 2.0]]])  # [1, 1, 2]
     v1 = torch.tensor([[[3.0, 4.0]]])
     state.update_base_kv(layer=0, k=k1, v=v1)
@@ -65,12 +65,12 @@ def test_base_kv_append_preserves_values():
 
 
 def test_masked_kv_initially_none():
-    state = DeCoreState()
+    state = AblationState()
     assert state.get_masked_kv(layer=0) == (None, None)
 
 
 def test_masked_kv_update_and_retrieve():
-    state = DeCoreState()
+    state = AblationState()
     k = torch.zeros(5, 4, 64)
     v = torch.ones(5, 4, 64)
     state.update_masked_kv(layer=0, k=k, v=v)
@@ -83,7 +83,7 @@ def test_masked_kv_update_and_retrieve():
 
 
 def test_copy_base_to_masked_kv_values_match():
-    state = DeCoreState()
+    state = AblationState()
     k = torch.randn(5, 4, 64)
     v = torch.randn(5, 4, 64)
     state.update_base_kv(layer=0, k=k, v=v)
@@ -95,7 +95,7 @@ def test_copy_base_to_masked_kv_values_match():
 
 def test_copy_base_to_masked_kv_is_independent():
     """After copying, mutating the masked cache should NOT affect the base cache."""
-    state = DeCoreState()
+    state = AblationState()
     k = torch.zeros(3, 2, 4)
     v = torch.ones(3, 2, 4)
     state.update_base_kv(layer=0, k=k, v=v)
@@ -114,7 +114,7 @@ def test_copy_base_to_masked_kv_is_independent():
 
 def test_copy_base_to_masked_clears_old_masked():
     """Copy should replace any pre-existing masked cache, not merge."""
-    state = DeCoreState()
+    state = AblationState()
     # Pre-populate masked with layer 5
     state.update_masked_kv(layer=5, k=torch.zeros(1, 1, 1), v=torch.zeros(1, 1, 1))
     # Now set base for layer 0 only
@@ -129,7 +129,7 @@ def test_copy_base_to_masked_clears_old_masked():
 
 
 def test_reset_kv_caches_clears_both():
-    state = DeCoreState()
+    state = AblationState()
     state.update_base_kv(layer=0, k=torch.zeros(3, 2, 8), v=torch.zeros(3, 2, 8))
     state.update_masked_kv(layer=1, k=torch.zeros(3, 2, 8), v=torch.zeros(3, 2, 8))
     state.reset_kv_caches()
@@ -139,7 +139,7 @@ def test_reset_kv_caches_clears_both():
 
 def test_layers_are_independent():
     """KV updates to one layer should not affect another."""
-    state = DeCoreState()
+    state = AblationState()
     state.update_base_kv(layer=0, k=torch.zeros(2, 1, 4), v=torch.zeros(2, 1, 4))
     state.update_base_kv(layer=1, k=torch.ones(3, 1, 4), v=torch.ones(3, 1, 4))
     k0, _ = state.get_base_kv(layer=0)
@@ -155,7 +155,7 @@ def test_layers_are_independent():
 
 def test_prealloc_get_returns_only_populated_slice():
     """With set_kv_capacity, get_*_kv returns buf[:seq_len], not the whole buffer."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_kv_capacity(16)
     state.update_base_kv(layer=0, k=torch.ones(3, 2, 4), v=torch.ones(3, 2, 4) * 2)
 
@@ -169,7 +169,7 @@ def test_prealloc_get_returns_only_populated_slice():
 
 def test_prealloc_append_writes_into_existing_buffer():
     """Two consecutive updates share one preallocated buffer (no torch.cat realloc)."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_kv_capacity(16)
     state.update_base_kv(layer=0, k=torch.ones(3, 2, 4), v=torch.ones(3, 2, 4))
     # Capture the buffer identity after first write
@@ -189,7 +189,7 @@ def test_prealloc_append_writes_into_existing_buffer():
 
 def test_prealloc_overflow_raises():
     """Writing past capacity should fail with a clear error."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_kv_capacity(4)
     state.update_base_kv(layer=0, k=torch.zeros(3, 1, 2), v=torch.zeros(3, 1, 2))
 
@@ -201,7 +201,7 @@ def test_prealloc_overflow_raises():
 
 def test_prealloc_copy_base_to_masked_is_independent():
     """copy_base_to_masked_kv allocates an independent masked buffer in the prealloc path."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_kv_capacity(8)
     state.update_base_kv(layer=0, k=torch.zeros(3, 2, 4), v=torch.ones(3, 2, 4))
     state.copy_base_to_masked_kv()
@@ -219,7 +219,7 @@ def test_prealloc_copy_base_to_masked_is_independent():
 
 def test_prealloc_reset_clears_buffers_and_seq_lens():
     """reset_kv_caches drops both buffers and length counters in the prealloc path."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_kv_capacity(8)
     state.update_base_kv(layer=0, k=torch.zeros(3, 2, 4), v=torch.zeros(3, 2, 4))
     state.update_masked_kv(layer=1, k=torch.zeros(3, 2, 4), v=torch.zeros(3, 2, 4))

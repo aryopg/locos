@@ -5,11 +5,11 @@ Examples::
 
     # Upload Inspect AI eval logs
     python scripts/upload_results.py ./logs/2024-01-15T10_30_00_medrag \\
-        --repo-id aryopg/decore-results
+        --repo-id aryopg/locos-results
 
     # Upload retrieval heads with a custom subfolder
     python scripts/upload_results.py ./retrieval_heads \\
-        --repo-id aryopg/decore-results \\
+        --repo-id aryopg/locos-results \\
         --path-in-repo retrieval_heads/llama3-8b
 """
 
@@ -25,7 +25,7 @@ def main() -> None:
         description="Upload a results directory to HuggingFace Hub.",
     )
     parser.add_argument("local_dir", help="Local directory to upload.")
-    parser.add_argument("--repo-id", required=True, help="HF repo id (e.g. aryopg/decore-results).")
+    parser.add_argument("--repo-id", required=True, help="HF repo id (e.g. aryopg/locos-results).")
     parser.add_argument("--path-in-repo", default=None, help="Subfolder in the repo (default: directory name).")
     parser.add_argument("--repo-type", default="dataset", choices=["dataset", "model", "space"])
     parser.add_argument("--commit-message", default=None, help="Custom commit message.")

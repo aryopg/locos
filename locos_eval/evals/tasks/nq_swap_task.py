@@ -7,7 +7,7 @@ answer with the substituted answer (following context), not the original
 
 Metrics:
 - ``sub_em``: Subspan exact match against the substituted answer.
-  Higher means the model is more faithful to context (good for DeCoRe).
+  Higher means the model is more faithful to context (good for LOCOS ablation).
 - ``org_em``: Subspan exact match against the original answer.
   Higher means the model relies on parametric memory (bad).
 

@@ -223,22 +223,23 @@ def _parse_run_info(path: Path) -> dict[str, str]:
     task_dir = path.parent.parent.parent.name if path.parent.parent.parent != path.parent.parent else ""
     if task_dir and model_dir and name.startswith("results_"):
         info["variant"] = variant_dir
-        info["decoding"] = variant_dir.split("_")[0]  # "decore_niah" -> "decore"
+        first_part = variant_dir.split("_")[0]
+        info["decoding"] = "ablation" if first_part in ("locos", "ablation") else first_part
         info["model"] = model_dir
         info["task"] = task_dir
         return info
 
     # Old structured layout: parent = model dir, grandparent = task dir
-    if model_dir and parts[0] in ("decore", "greedy"):
-        info["decoding"] = parts[0]
+    if model_dir and parts[0] in ("locos", "ablation", "greedy"):
+        info["decoding"] = "ablation" if parts[0] in ("locos", "ablation") else parts[0]
         info["variant"] = parts[0]
         info["model"] = path.parent.name
         info["task"] = model_dir if task_dir else ""
         return info
 
     # Legacy flat layout
-    if "decore" in parts:
-        info["decoding"] = "decore"
+    if "ablation" in parts or "locos" in parts:
+        info["decoding"] = "ablation"
     elif "greedy" in parts:
         info["decoding"] = "greedy"
     else:
@@ -251,7 +252,7 @@ def _file_label(path: Path) -> str:
     """Human-readable label for a results file."""
     info = _parse_run_info(path)
     variant = info.get("variant", info["decoding"])
-    tag = "\U0001f7e2" if "decore" in variant else "\u26aa"
+    tag = "\U0001f7e2" if ("ablation" in variant or "locos" in variant) else "\u26aa"
     model = info.get("model", "")
     if model:
         return f"{tag} {model} / {variant} ({path.name})"
@@ -282,15 +283,15 @@ def main():
             st.warning(f"No ACI-Bench result files found in `{results_dir}/`")
             st.stop()
 
-        # Auto-detect if both decore and greedy files exist
+        # Auto-detect if both ablation and greedy files exist
         st.header("Run Selection")
         decodings = {_parse_run_info(f)["decoding"] for f in jsonl_files}
-        has_both = "decore" in decodings and "greedy" in decodings
+        has_both = "ablation" in decodings and "greedy" in decodings
         compare_mode = st.checkbox("Compare two runs", value=has_both)
 
         if compare_mode:
-            # Pre-select decore for A and greedy for B when available
-            default_a = next((i for i, f in enumerate(jsonl_files) if _parse_run_info(f)["decoding"] == "decore"), 0)
+            # Pre-select ablation for A and greedy for B when available
+            default_a = next((i for i, f in enumerate(jsonl_files) if _parse_run_info(f)["decoding"] == "ablation"), 0)
             default_b = next((i for i, f in enumerate(jsonl_files) if _parse_run_info(f)["decoding"] == "greedy"), 0)
             col_a, col_b = st.columns(2)
             with col_a:

@@ -11,13 +11,13 @@ Usage:
 
     # Explicit per-file mode (legacy)
     python scripts/eval/plot_acibench_radar.py \
-        --decore results_decore.jsonl \
+        --ablation results_ablation.jsonl \
         --greedy results_greedy.jsonl \
         --out figures/acibench_radar.svg
 
     # With custom labels
     python scripts/eval/plot_acibench_radar.py \
-        --results-dir eval_results --labels "DeCoRe" "Greedy"
+        --results-dir eval_results --labels "LOCOS" "Greedy"
 """
 
 from __future__ import annotations
@@ -71,7 +71,7 @@ def discover_model_results(results_dir: Path) -> dict[str, dict[str, Path]]:
     the legacy flat layout (``{model}/{decoding}_*.jsonl``).
 
     Returns:
-        ``{model_name: {"greedy": Path, "decore_niah": Path, ...}}``
+        ``{model_name: {"greedy": Path, "locos_niah": Path, ...}}``
     """
     task_dir = results_dir / "aci_bench"
     assert task_dir.is_dir(), f"No aci_bench directory found at {task_dir}"
@@ -282,14 +282,14 @@ def main():
     )
 
     # Legacy: explicit file mode
-    parser.add_argument("--decore", default=None, help="Path to DeCoRe results JSONL")
+    parser.add_argument("--ablation", default=None, help="Path to LOCOS ablation results JSONL")
     parser.add_argument("--greedy", default=None, help="Path to Greedy results JSONL")
 
     parser.add_argument(
         "--labels",
         nargs="+",
-        default=["DeCoRe", "Greedy"],
-        help="Legend labels (default: DeCoRe Greedy)",
+        default=["LOCOS", "Greedy"],
+        help="Legend labels (default: LOCOS Greedy)",
     )
     parser.add_argument(
         "--out",
@@ -320,19 +320,19 @@ def main():
             out_path = out_dir / f"acibench_radar_{model_name}{out_suffix}"
             make_radar(runs, labels, out_path)
 
-    elif args.decore is not None and args.greedy is not None:
+    elif args.ablation is not None and args.greedy is not None:
         # Legacy explicit mode
-        decore_means = load_mean_scores(args.decore)
+        ablation_means = load_mean_scores(args.ablation)
         greedy_means = load_mean_scores(args.greedy)
 
-        runs = [decore_means, greedy_means]
+        runs = [ablation_means, greedy_means]
         labels = args.labels[:2]
 
         print_comparison(runs, labels)
         make_radar(runs, labels, Path(args.out))
 
     else:
-        parser.error("Provide either --results-dir or both --decore and --greedy")
+        parser.error("Provide either --results-dir or both --ablation and --greedy")
 
 
 if __name__ == "__main__":

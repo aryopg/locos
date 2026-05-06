@@ -3,7 +3,7 @@ import torch
 from locos_eval.retrieval_heads import group_heads_by_layer
 
 
-class DeCoreState:
+class AblationState:
     """Mutable singleton-style state shared between the generation loop and patched attention layers.
 
     Lifecycle:

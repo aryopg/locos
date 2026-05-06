@@ -6,8 +6,4 @@ sampling_top_k: 20
 # --- Model / hardware ---
 max_model_len: null
 tensor_parallel_size: 1
-# Tuned for the native ablation / greedy paths (paged KV cache + continuous
-# batching). 4B bf16 ≈ 8 GB; 0.85 × 80 GB H100 = 68 GB → ~60 GB KV-cache budget.
-# Decore mode isn't used in this project — bump down via
-# DECORE_GPU_MEMORY_UTILIZATION if you reintroduce it.
 gpu_memory_utilization: 0.85

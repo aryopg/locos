@@ -107,18 +107,18 @@ def _make_experiment(
 class TestScanFindsExperiments:
     def test_finds_two_experiments(self, tmp_path: Path):
         _make_experiment(tmp_path, "nq_swap", "meta-llama_Llama-3-8B", "greedy")
-        _make_experiment(tmp_path, "aci_bench", "meta-llama_Llama-3-8B", "decore_niah")
+        _make_experiment(tmp_path, "aci_bench", "meta-llama_Llama-3-8B", "locos_niah")
         experiments = scan_local_experiments(tmp_path)
         assert len(experiments) == 2
 
     def test_experiment_keys_correct(self, tmp_path: Path):
         _make_experiment(tmp_path, "nq_swap", "meta-llama_Llama-3-8B", "greedy")
-        _make_experiment(tmp_path, "aci_bench", "meta-llama_Llama-3-8B", "decore_niah")
+        _make_experiment(tmp_path, "aci_bench", "meta-llama_Llama-3-8B", "locos_niah")
         experiments = scan_local_experiments(tmp_path)
         keys = {e["experiment_key"] for e in experiments}
         assert keys == {
             "nq_swap/meta-llama_Llama-3-8B/greedy",
-            "aci_bench/meta-llama_Llama-3-8B/decore_niah",
+            "aci_bench/meta-llama_Llama-3-8B/locos_niah",
         }
 
 
@@ -292,12 +292,12 @@ class TestScanIncludesGenerations:
 # ---------------------------------------------------------------------------
 class TestDescriptorFields:
     def test_task_model_variant_fields(self, tmp_path: Path):
-        _make_experiment(tmp_path, "nq_swap", "meta-llama_Llama-3-8B", "decore_niah")
+        _make_experiment(tmp_path, "nq_swap", "meta-llama_Llama-3-8B", "locos_niah")
         experiments = scan_local_experiments(tmp_path)
         exp = experiments[0]
         assert exp["task"] == "nq_swap"
         assert exp["model_slug"] == "meta-llama_Llama-3-8B"
-        assert exp["variant"] == "decore_niah"
+        assert exp["variant"] == "locos_niah"
 
     def test_local_path_is_absolute(self, tmp_path: Path):
         _make_experiment(tmp_path, "nq_swap", "model_a", "greedy")

@@ -2,8 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import torch
 
-from locos_eval.attention import build_decore_attention_forward, unpatch_single_layer
-from locos_eval.state import DeCoreState
+from locos_eval.attention import build_ablation_attention_forward, unpatch_single_layer
+from locos_eval.state import AblationState
 
 
 def make_mock_llama_attn(num_heads=8, num_kv_heads=8, head_dim=64):
@@ -39,7 +39,7 @@ def _setup_mock_attn(attn, num_heads, num_kv_heads, head_dim, num_tokens):
 
 def test_inactive_state_calls_original_forward():
     """When state.active is False, the original forward is called unchanged."""
-    state = DeCoreState()
+    state = AblationState()
     state.active = False
 
     positions = torch.zeros(2, dtype=torch.long)
@@ -49,7 +49,7 @@ def test_inactive_state_calls_original_forward():
     original_forward = MagicMock(return_value=expected_output)
     attn = make_mock_llama_attn()
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=original_forward)
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=original_forward)
     result = forward_fn(positions, hidden)
 
     original_forward.assert_called_once_with(positions, hidden)
@@ -58,7 +58,7 @@ def test_inactive_state_calls_original_forward():
 
 def test_active_state_does_not_call_original_forward():
     """When state.active is True, original_forward should never be called."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([])
     state.active = True
     state.masked_pass_active = False
@@ -68,7 +68,7 @@ def test_active_state_does_not_call_original_forward():
     attn = make_mock_llama_attn(num_heads=num_heads, num_kv_heads=num_heads, head_dim=head_dim)
     _setup_mock_attn(attn, num_heads, num_heads, head_dim, num_tokens)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=original_forward)
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=original_forward)
 
     with patch(
         "locos_eval.attention.F.scaled_dot_product_attention", side_effect=lambda q, k, v, **kw: torch.zeros_like(q)
@@ -83,7 +83,7 @@ def test_active_state_does_not_call_original_forward():
 
 def test_base_pass_writes_to_base_kv_only():
     """Base pass should populate _base_kv and leave _masked_kv empty."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([(0, 2)])
     state.active = True
     state.masked_pass_active = False
@@ -92,7 +92,7 @@ def test_base_pass_writes_to_base_kv_only():
     attn = make_mock_llama_attn(num_heads=num_heads)
     _setup_mock_attn(attn, num_heads, num_heads, head_dim, num_tokens)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch(
         "locos_eval.attention.F.scaled_dot_product_attention", side_effect=lambda q, k, v, **kw: torch.zeros_like(q)
@@ -106,7 +106,7 @@ def test_base_pass_writes_to_base_kv_only():
 
 def test_masked_pass_writes_to_masked_kv_only():
     """Masked pass should populate _masked_kv and leave _base_kv empty."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([])
     state.active = True
     state.masked_pass_active = True
@@ -115,7 +115,7 @@ def test_masked_pass_writes_to_masked_kv_only():
     attn = make_mock_llama_attn(num_heads=num_heads)
     _setup_mock_attn(attn, num_heads, num_heads, head_dim, num_tokens)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch(
         "locos_eval.attention.F.scaled_dot_product_attention", side_effect=lambda q, k, v, **kw: torch.zeros_like(q)
@@ -132,7 +132,7 @@ def test_masked_pass_writes_to_masked_kv_only():
 
 def test_masked_pass_zeros_specified_heads():
     """In masked mode, query states for retrieval heads should be zeroed."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([(0, 2), (0, 5)])
     state.active = True
     state.masked_pass_active = True
@@ -147,7 +147,7 @@ def test_masked_pass_zeros_specified_heads():
         captured_queries.append(q.clone())
         return torch.zeros_like(q)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch("locos_eval.attention.F.scaled_dot_product_attention", fake_sdpa):
         forward_fn(torch.zeros(num_tokens, dtype=torch.long), torch.randn(num_tokens, 512))
@@ -163,7 +163,7 @@ def test_masked_pass_zeros_specified_heads():
 
 def test_base_pass_does_not_zero_any_heads():
     """Base pass should preserve ALL query heads — none zeroed."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([(0, 2), (0, 5)])  # same heads as masked test
     state.active = True
     state.masked_pass_active = False  # base pass
@@ -178,7 +178,7 @@ def test_base_pass_does_not_zero_any_heads():
         captured_queries.append(q.clone())
         return torch.zeros_like(q)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch("locos_eval.attention.F.scaled_dot_product_attention", fake_sdpa):
         forward_fn(torch.zeros(num_tokens, dtype=torch.long), torch.randn(num_tokens, 512))
@@ -191,7 +191,7 @@ def test_base_pass_does_not_zero_any_heads():
 
 def test_masked_pass_does_not_zero_heads_in_other_layers():
     """Retrieval heads for layer 0 should not affect layer 1."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([(0, 2)])  # only layer 0
     state.active = True
     state.masked_pass_active = True
@@ -206,7 +206,7 @@ def test_masked_pass_does_not_zero_heads_in_other_layers():
         captured_queries.append(q.clone())
         return torch.zeros_like(q)
 
-    forward_fn = build_decore_attention_forward(attn, state, 1, original_forward=MagicMock())  # layer 1!
+    forward_fn = build_ablation_attention_forward(attn, state, 1, original_forward=MagicMock())  # layer 1!
 
     with patch("locos_eval.attention.F.scaled_dot_product_attention", fake_sdpa):
         forward_fn(torch.zeros(num_tokens, dtype=torch.long), torch.randn(num_tokens, 512))
@@ -226,7 +226,7 @@ def test_gqa_expansion_num_kv_heads_less_than_num_heads():
     long contexts with asymmetric head counts the dispatcher falls back to
     the math kernel and materialises a full attention matrix (~40 GiB at 32K
     prefill on Qwen3-14B), OOMing the GPU."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([])
     state.active = True
     state.masked_pass_active = False
@@ -244,7 +244,7 @@ def test_gqa_expansion_num_kv_heads_less_than_num_heads():
         captured_kv["kwargs"] = dict(kwargs)
         return torch.zeros_like(q)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch("locos_eval.attention.F.scaled_dot_product_attention", capture_sdpa):
         forward_fn(torch.zeros(num_tokens, dtype=torch.long), torch.randn(num_tokens, 512))
@@ -275,7 +275,7 @@ def test_decode_step_skips_manual_gqa_expansion():
     a few MB), so we skip the manual K/V expansion and pass K/V at the kv_head
     count with enable_gqa=True — saves ~Hq/Hkv× allocator churn per layer per
     decode token in long-context generation."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([])
     state.active = True
     state.masked_pass_active = False
@@ -303,7 +303,7 @@ def test_decode_step_skips_manual_gqa_expansion():
         captured_kv["kwargs"] = dict(kwargs)
         return torch.zeros_like(q)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch("locos_eval.attention.F.scaled_dot_product_attention", capture_sdpa):
         forward_fn(torch.zeros(num_tokens, dtype=torch.long), torch.randn(num_tokens, 512))
@@ -325,7 +325,7 @@ def test_decode_step_skips_manual_gqa_expansion():
 def test_single_token_attention_output_equals_value():
     """With 1 query token and 1 KV token, SDPA output = V (softmax of single score is 1.0).
     This tests the full attention pipeline without mocking SDPA."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([])
     state.active = True
     state.masked_pass_active = False
@@ -344,7 +344,7 @@ def test_single_token_attention_output_equals_value():
     # o_proj is identity
     attn.o_proj.side_effect = lambda x: (x, None)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
     # No mock on SDPA — use the real one
     output = forward_fn(torch.zeros(1, dtype=torch.long), torch.randn(1, 512))
 
@@ -357,7 +357,7 @@ def test_single_token_attention_output_equals_value():
 
 def test_is_causal_true_for_multi_token_prefill():
     """Multi-token input should use is_causal=True."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([])
     state.active = True
     state.masked_pass_active = False
@@ -373,7 +373,7 @@ def test_is_causal_true_for_multi_token_prefill():
         captured_kwargs.update(kwargs)
         return torch.zeros_like(q)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch("locos_eval.attention.F.scaled_dot_product_attention", capture_sdpa):
         forward_fn(torch.zeros(num_tokens, dtype=torch.long), torch.randn(num_tokens, 512))
@@ -383,7 +383,7 @@ def test_is_causal_true_for_multi_token_prefill():
 
 def test_is_causal_false_for_single_token_decode():
     """Single-token input (decode step) should use is_causal=False."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([])
     state.active = True
     state.masked_pass_active = False
@@ -399,7 +399,7 @@ def test_is_causal_false_for_single_token_decode():
         captured_kwargs.update(kwargs)
         return torch.zeros_like(q)
 
-    forward_fn = build_decore_attention_forward(attn, state, 0, original_forward=MagicMock())
+    forward_fn = build_ablation_attention_forward(attn, state, 0, original_forward=MagicMock())
 
     with patch("locos_eval.attention.F.scaled_dot_product_attention", capture_sdpa):
         forward_fn(torch.zeros(num_tokens, dtype=torch.long), torch.randn(num_tokens, 512))
@@ -412,20 +412,20 @@ def test_is_causal_false_for_single_token_decode():
 
 def test_unpatch_restores_original_forward():
     """unpatch_single_layer restores the original forward method."""
-    state = DeCoreState()
+    state = AblationState()
     state.set_retrieval_heads([(0, 1)])
 
     attn = make_mock_llama_attn()
     original_forward = attn.forward
 
-    new_fwd = build_decore_attention_forward(attn, state, 0, original_forward=original_forward)
+    new_fwd = build_ablation_attention_forward(attn, state, 0, original_forward=original_forward)
     attn.forward = new_fwd
-    attn._decore_patched = True
-    attn._decore_original_forward = original_forward
+    attn._ablation_patched = True
+    attn._ablation_original_forward = original_forward
 
-    assert attn._decore_patched is True
+    assert attn._ablation_patched is True
 
     unpatch_single_layer(attn)
 
-    assert not hasattr(attn, "_decore_patched")
+    assert not hasattr(attn, "_ablation_patched")
     assert attn.forward is original_forward

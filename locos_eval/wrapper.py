@@ -3,20 +3,20 @@
 Usage::
 
     from vllm import LLM
-    from locos_eval import decore
+    from locos_eval import ablation
 
     llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct")
 
     # Greedy baseline
-    gen = decore(llm, decoding="greedy")
+    gen = ablation(llm, decoding="greedy")
     result = gen.generate("The capital of France is")
 
     # Ablation: zero retrieval heads throughout
-    gen = decore(llm, heads="retrieval_heads/Meta-Llama-3-8B-Instruct.json", decoding="ablation")
+    gen = ablation(llm, heads="retrieval_heads/Meta-Llama-3-8B-Instruct.json", decoding="ablation")
     result = gen.generate("The capital of France is")
 
     # Context manager for scoped patch/unpatch
-    with decore(llm, heads="retrieval_heads/...", decoding="ablation") as gen:
+    with ablation(llm, heads="retrieval_heads/...", decoding="ablation") as gen:
         result = gen.generate("The capital of France is")
     # attention unpatched on exit
 """
@@ -41,7 +41,7 @@ from locos_eval.rpc_ops import (
 ABLATION_MODES = ("zero", "mean")
 DECODING_MODES = ("greedy", "ablation")
 
-# DeCoRe requires direct access to the model's nn.Module for manual forward
+# ablation requires direct access to the model's nn.Module for manual forward
 # passes. vLLM v0.18+ defaults to multiprocess mode, which puts the model in
 # a separate process and prevents apply_model() from working with lambdas.
 # This must be set before vLLM creates the engine.
@@ -314,7 +314,7 @@ def _get_tp_size(llm) -> int:
         return 1
 
 
-def decore(
+def ablation(
     llm,
     heads: str | list[tuple[int, int]] | None = None,
     num_heads: int | None = None,

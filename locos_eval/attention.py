@@ -15,7 +15,7 @@ from collections.abc import Callable
 import torch.nn.functional as F
 from torch.nn.attention import SDPBackend, sdpa_kernel
 
-from locos_eval.state import DeCoreState
+from locos_eval.state import AblationState
 
 # Whitelist of SDPA backends safe at long contexts: Flash and memory-efficient
 # attention compute O(N) memory; the math kernel materialises [Hq, n_new, seq]
@@ -124,9 +124,9 @@ def get_lm_head(model):
     )
 
 
-def build_decore_attention_forward(
+def build_ablation_attention_forward(
     attn_module,
-    state: DeCoreState,
+    state: AblationState,
     layer_idx: int,
     original_forward: Callable | None = None,
 ) -> Callable:
@@ -134,7 +134,7 @@ def build_decore_attention_forward(
 
     Args:
         attn_module: The LlamaAttention instance to wrap.
-        state: Shared DeCoreState.
+        state: Shared AblationState.
         layer_idx: The layer index (vLLM v0.18 removed layer_idx from attn).
         original_forward: The original (unpatched) forward method.
             Captured from the class to avoid infinite recursion on re-patch.
@@ -171,11 +171,11 @@ def build_decore_attention_forward(
     q_norm = None if is_olmo2 else getattr(attn_module, "q_norm", None)
     k_norm = None if is_olmo2 else getattr(attn_module, "k_norm", None)
 
-    def decore_forward(positions, hidden_states, **kwargs):
+    def ablation_forward(positions, hidden_states, **kwargs):
         if not state.active:
             return original_forward(positions, hidden_states, **kwargs)
 
-        # --- DeCoRe active: both passes use SDPA with our KV caches ---
+        # --- ablation active: both passes use SDPA with our KV caches ---
 
         # 1. QKV projection + rotary embedding
         qkv, _ = attn_module.qkv_proj(hidden_states)
@@ -263,10 +263,10 @@ def build_decore_attention_forward(
         output, _ = attn_module.o_proj(attn_out)
         return output
 
-    return decore_forward
+    return ablation_forward
 
 
-def patch_model_attention_layers(model, state: DeCoreState) -> None:
+def patch_model_attention_layers(model, state: AblationState) -> None:
     """Walk the model's attention layers and monkey-patch their forward methods.
 
     Safe to call multiple times — already-patched layers are skipped.
@@ -276,7 +276,7 @@ def patch_model_attention_layers(model, state: DeCoreState) -> None:
     Args:
         model: The vLLM-loaded model (LlamaForCausalLM, Gemma3ForCausalLM,
             Gemma3ForConditionalGeneration, or compatible).
-        state: The shared DeCoreState instance.
+        state: The shared AblationState instance.
     """
     supported_classes = _get_supported_attention_classes()
     layers = get_decoder_layers(model)
@@ -286,13 +286,13 @@ def patch_model_attention_layers(model, state: DeCoreState) -> None:
         attn = layer.self_attn
         if not isinstance(attn, supported_classes):
             continue
-        if hasattr(attn, "_decore_patched"):
+        if hasattr(attn, "_ablation_patched"):
             continue
         original = type(attn).forward.__get__(attn)
-        attn._decore_original_forward = original
-        new_forward = build_decore_attention_forward(attn, state, layer_idx=layer_idx, original_forward=original)
+        attn._ablation_original_forward = original
+        new_forward = build_ablation_attention_forward(attn, state, layer_idx=layer_idx, original_forward=original)
         attn.forward = new_forward
-        attn._decore_patched = True
+        attn._ablation_patched = True
         patched += 1
 
     if patched == 0:
@@ -304,15 +304,15 @@ def patch_model_attention_layers(model, state: DeCoreState) -> None:
 
 def unpatch_single_layer(module) -> None:
     """Restore the original forward on a single attention module."""
-    if hasattr(module, "_decore_original_forward"):
-        module.forward = module._decore_original_forward
-        del module._decore_original_forward
-    if hasattr(module, "_decore_patched"):
-        del module._decore_patched
+    if hasattr(module, "_ablation_original_forward"):
+        module.forward = module._ablation_original_forward
+        del module._ablation_original_forward
+    if hasattr(module, "_ablation_patched"):
+        del module._ablation_patched
 
 
 def unpatch_model_attention_layers(model) -> None:
-    """Reverse all DeCoRe monkey-patches on the model's attention layers."""
+    """Reverse all ablation monkey-patches on the model's attention layers."""
     for module in model.modules():
-        if hasattr(module, "_decore_patched"):
+        if hasattr(module, "_ablation_patched"):
             unpatch_single_layer(module)

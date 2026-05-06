@@ -765,7 +765,7 @@ def main():
     # Resolve output path. Suffix the file by metric so the two variants can
     # coexist on disk without overwriting each other.
     # FIXME(aryo): for backward compatibility with the existing
-    # answer_logprob CRI JSON on HF (aryopg/decore-results), the
+    # answer_logprob CRI JSON on HF (aryopg/locos-results), the
     # answer_logprob variant still writes to the historical `{model}_cri.json`
     # path. The new first_token_logit_diff variant gets a
     # `_first_token_logit_diff` suffix. If we want to retroactively rename

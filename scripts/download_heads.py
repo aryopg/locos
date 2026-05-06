@@ -4,15 +4,15 @@
 Examples::
 
     # Download default heads for a model
-    python scripts/download_heads.py --repo-id aryopg/decore-results \
+    python scripts/download_heads.py --repo-id aryopg/locos-results \
         --heads retrieval_heads/Meta-Llama-3-8B-Instruct.json
 
     # Download a specific variant
-    python scripts/download_heads.py --repo-id aryopg/decore-results \
+    python scripts/download_heads.py --repo-id aryopg/locos-results \
         --heads retrieval_heads/Meta-Llama-3-8B-Instruct_nolima.json
 
     # Custom output path
-    python scripts/download_heads.py --repo-id aryopg/decore-results \
+    python scripts/download_heads.py --repo-id aryopg/locos-results \
         --heads retrieval_heads/Meta-Llama-3-8B-Instruct.json \
         --output /tmp/heads.json
 """
@@ -42,7 +42,7 @@ def download_heads(
     The HF path mirrors the local path (e.g. ``retrieval_heads/Model.json``).
 
     Args:
-        repo_id: HF Hub repo (e.g. ``"aryopg/decore-results"``).
+        repo_id: HF Hub repo (e.g. ``"aryopg/locos-results"``).
         heads_path: Path to the heads file, used as both the HF filename and
             the default local output path.
         output: Override local output path. Defaults to *heads_path*.
@@ -90,7 +90,7 @@ def main() -> None:
     parser.add_argument(
         "--repo-id",
         required=True,
-        help="HF repo id (e.g. aryopg/decore-results).",
+        help="HF repo id (e.g. aryopg/locos-results).",
     )
     parser.add_argument(
         "--heads",

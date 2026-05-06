@@ -10,5 +10,5 @@ tensor_parallel_size: 2
 # batching). 27B bf16 / TP=2 ≈ 27 GB per rank; 0.80 × 80 GB H100 = 64 GB
 # total → ~37 GB KV-cache + activation budget per rank. Slightly more
 # conservative than TP=1 configs (TP all-reduce buffers eat into headroom).
-# Decore mode isn't used in this project.
+# LOCOS ablation mode isn't used in this project.
 gpu_memory_utilization: 0.80

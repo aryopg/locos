@@ -8,7 +8,7 @@ def load_retrieval_heads(
     num_heads: int | None = None,
     score_threshold: float = 0.4,
 ) -> list[tuple[int, int]]:
-    """Load pre-computed retrieval head rankings from a DeCoRe JSON file.
+    """Load pre-computed retrieval head rankings from a LOCOS JSON file.
 
     Heads are selected by *score threshold* (default) or *top-N count*.
     When ``num_heads`` is provided it takes precedence over the threshold.

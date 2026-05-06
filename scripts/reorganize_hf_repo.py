@@ -14,8 +14,8 @@ repo root should be empty and only the flat top-level directories remain.
 
 Usage::
 
-    python scripts/reorganize_hf_repo.py --repo-id aryopg/decore-results --dry-run
-    python scripts/reorganize_hf_repo.py --repo-id aryopg/decore-results
+    python scripts/reorganize_hf_repo.py --repo-id aryopg/locos-results --dry-run
+    python scripts/reorganize_hf_repo.py --repo-id aryopg/locos-results
 """
 
 from __future__ import annotations
@@ -176,7 +176,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Reorganize HF repo: flatten model-slug directories.",
     )
-    parser.add_argument("--repo-id", required=True, help="HF dataset repo (e.g. aryopg/decore-results)")
+    parser.add_argument("--repo-id", required=True, help="HF dataset repo (e.g. aryopg/locos-results)")
     parser.add_argument("--repo-type", default="dataset")
     parser.add_argument("--dry-run", action="store_true", help="Preview without making changes")
     parser.add_argument("--token", default=None, help="HF API token")
