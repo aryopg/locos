@@ -265,40 +265,7 @@ uv pip install -e ".[eval]" --python .venv/bin/python
 
 ### Running evaluations
 
-```bash
-# Greedy baseline
-python -m locos_eval.evals.tasks.nq_swap_task \
-    --model meta-llama/Meta-Llama-3-8B-Instruct \
-    --decoding greedy --tp 4
-
-# Ablation: zero top-50 LOCOS heads
-python -m locos_eval.evals.tasks.nq_swap_task \
-    --model meta-llama/Meta-Llama-3-8B-Instruct \
-    --heads retrieval_heads/Meta-Llama-3-8B-Instruct_logit_contrib_nolima.json \
-    --decoding ablation --num-heads 50 --tp 4
-
-# Ablation with mean replacement (closer to nolima_ablation calibration)
-python -m locos_eval.evals.tasks.nq_swap_task \
-    --model meta-llama/Meta-Llama-3-8B-Instruct \
-    --heads retrieval_heads/Meta-Llama-3-8B-Instruct_logit_contrib_nolima.json \
-    --decoding ablation --ablation-mode mean --num-heads 50 --tp 4
-```
-
-Common flags: `--tp` (tensor-parallel GPUs), `--gpu-mem` (vLLM memory fraction, default 0.5), `--limit` (max samples, for debugging), `--output-dir` (default: `eval_results/`), `--score-only <generations.jsonl>` (re-score without GPU).
-
-Runs are checkpointed per-sample and auto-resume on restart.
-
-### Available tasks
-
-| Task | Dataset | Metrics |
-|------|---------|---------|
-| `nq_swap_task` | NQ-Swap | sub_EM (context faithfulness), org_EM (parametric recall) |
-| `medrag_task` | 5 medical MCQ datasets | Accuracy |
-| `xsum_task` | XSum | ROUGE-L, BERTScore, FactKB |
-| `aci_bench_task` | ACI-Bench D2N | ROUGE-L, BERTScore, LLM judge |
-| `longbench_v2_task` | LongBench-v2 | Accuracy (long-context MCQ) |
-| `babilong_task` | BABILong | Accuracy |
-| `musique_task` | MuSiQue | Accuracy (multi-hop QA) |
+TBD
 
 ---
 
