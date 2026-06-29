@@ -1,9 +1,9 @@
 # Publishes the static site in web/ to GitHub Pages.
 #
 # First-time setup:
-# - Add a repository secret named PAGES_TOKEN with permission to enable/configure
-#   Pages for this repo.
-# - The workflow will publish the project page from web/.
+# - In repo Settings -> Pages -> Build and deployment, set Source = "GitHub Actions".
+# - The workflow then publishes the project page from web/ using the default
+#   GITHUB_TOKEN (no PAT/secret needed).
 #
 # If aryopg.com is served by Cloudflare rather than GitHub Pages, this workflow
 # will still publish a GitHub Pages copy; route aryopg.com/locos through
@@ -34,9 +34,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-          token: ${{ secrets.PAGES_TOKEN }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./web
