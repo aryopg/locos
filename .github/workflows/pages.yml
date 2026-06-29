@@ -1,9 +1,13 @@
 # Publishes the static site in web/ to GitHub Pages.
-# Serves at https://aryopg.com/locos/ (custom-domain propagation from the
-# aryopg.github.io user site). Do NOT add a CNAME file to this repo.
 #
-# Before this runs: repo Settings -> Pages -> Source = "GitHub Actions".
-# (GitHub Pages on a private repo requires GitHub Pro; otherwise make the repo public.)
+# First-time setup:
+# - Add a repository secret named PAGES_TOKEN with permission to enable/configure
+#   Pages for this repo.
+# - The workflow will publish the project page from web/.
+#
+# If aryopg.com is served by Cloudflare rather than GitHub Pages, this workflow
+# will still publish a GitHub Pages copy; route aryopg.com/locos through
+# Cloudflare separately if you want that path to serve this artifact.
 name: Deploy web/ to GitHub Pages
 
 on:
@@ -30,6 +34,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+          token: ${{ secrets.PAGES_TOKEN }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./web
