@@ -12,7 +12,7 @@ written to a sibling CSV for downstream use (e.g. bar plot with error bars).
 
 Usage:
     python locos/plotting/longbench_v2_radar.py \
-        --results-root /Users/aryopg/Documents/school/phd/locos-results/downstream_results \
+        --results-root ../locos-results/downstream_results \
         --task longbench_v2_short \
         --out figures/longbench_v2_radar.svg
 """
@@ -37,6 +37,7 @@ import seaborn as sns
 from rich.console import Console
 from rich.table import Table
 
+from locos.plotting._paths import default_downstream_results_root
 from locos_eval.utils.plotting import MODEL_PRETTY_NAMES, save_figure, setup_plot_style
 
 console = Console()
@@ -352,7 +353,7 @@ def main() -> None:
     parser.add_argument(
         "--results-root",
         type=Path,
-        default=Path("/Users/aryopg/Documents/school/phd/locos-results/downstream_results"),
+        default=default_downstream_results_root(),
         help="Root directory holding downstream eval results.",
     )
     parser.add_argument(

@@ -20,7 +20,7 @@ from pathlib import Path
 
 # Default prefix for eval results in HF repo (must match sync_results.py).
 # Override with --hf-prefix or the HF_EVAL_PREFIX env var.
-DEFAULT_HF_EVAL_PREFIX = "eval_results"
+DEFAULT_HF_EVAL_PREFIX = "downstream_results"
 
 
 def _download_manifest(repo_id: str, experiment_key: str, hf_prefix: str, repo_type: str = "dataset") -> Path | None:

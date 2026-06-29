@@ -15,7 +15,7 @@ Discovery and aggregation are shared with ``longbench_v2_radar.py``.
 
 Usage:
     python locos/plotting/longbench_v2_bar.py \
-        --results-root /Users/aryopg/Documents/school/phd/locos-results/downstream_results \
+        --results-root ../locos-results/downstream_results \
         --task longbench_v2_short \
         --out-dir figures/longbench_v2_bar
 """
@@ -36,6 +36,7 @@ import numpy as np
 import pandas as pd
 from rich.console import Console
 
+from locos.plotting._paths import default_downstream_results_root
 from locos.plotting.longbench_v2_radar import (
     METRIC,
     MODEL_ORDER,
@@ -382,7 +383,7 @@ def main() -> None:
     parser.add_argument(
         "--results-root",
         type=Path,
-        default=Path("/Users/aryopg/Documents/school/phd/locos-results/downstream_results"),
+        default=default_downstream_results_root(),
     )
     parser.add_argument("--task", type=str, default="longbench_v2_short")
     parser.add_argument(

@@ -25,7 +25,7 @@ for ds in ${DATASETS}; do
     if [[ "${FORCE:-}" != "true" ]]; then
         check_exit=0
         python scripts/check_experiment.py \
-            --repo-id "${HF_DOWNSTREAM_REPO}" \
+            --repo-id "${HF_RESULTS_REPO}" \
             --task "${TASK_NAME}" \
             --model "${MODEL}" \
             --decoding "${DECODING}" \
@@ -60,7 +60,7 @@ for ds in ${DATASETS}; do
     # Sync after each sub-dataset (partial results survive pod failures)
     echo "=== Syncing results (${ds}, prefix=${HF_EVAL_PREFIX}) ==="
     python scripts/sync_results.py \
-        --repo-id "${HF_DOWNSTREAM_REPO}" \
+        --repo-id "${HF_RESULTS_REPO}" \
         --local-dir "./${OUTPUT_DIR}" \
         --hf-prefix "${HF_EVAL_PREFIX}" || echo "WARNING: sync_results.py failed for ${ds} — results saved locally but NOT uploaded to HF" >&2
 done

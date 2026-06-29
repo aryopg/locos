@@ -230,13 +230,12 @@ vLLM v0.18 attribute changes in LlamaAttention/Gemma3Attention:
 
 ## Data & results
 
-Retrieval heads JSON files, detection outputs, and ablation analyses live on
-HuggingFace Hub at `aryopg/locos-results` (`HF_RESULTS_REPO`).
-Downstream eval results (NQ-Swap, MuSiQue, MedRAG, LongBench-v2, BABILong,
-ACI-Bench, XSum) live on a separate repo, `aryopg/locos_downstream_results`
-(`HF_DOWNSTREAM_REPO`). Use `scripts/download_heads.py` to fetch heads
-locally. The `retrieval_heads/` directory in-repo was removed in favor of HF
-storage.
+Retrieval heads JSON files, detection outputs, ablation analyses, downstream
+eval results, and logs live on HuggingFace Hub at `aryopg/locos-results`
+(`HF_RESULTS_REPO`). Downstream results are stored under the
+`downstream_results/` prefix in the same repo. Use `scripts/download_heads.py`
+to fetch heads locally. The `retrieval_heads/` directory in-repo was removed in
+favor of HF storage.
 
 ## Known limitations
 

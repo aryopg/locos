@@ -28,9 +28,9 @@ from rich.table import Table
 
 console = Console()
 
-# Default prefix for eval results in HF repo. Override with --hf-prefix on
-# the CLI, or infer from the local-dir basename when it differs from the default.
-DEFAULT_HF_EVAL_PREFIX = "eval_results"
+# Default prefix for downstream eval results in the public HF repo. Local runs
+# may still write eval_results/; uploads live under downstream_results/.
+DEFAULT_HF_EVAL_PREFIX = "downstream_results"
 
 # Regex for results files: results_YYYYMMDD_HHMMSS.jsonl
 _RESULTS_RE = re.compile(r"^results_(\d{8}_\d{6})\.jsonl$")
@@ -415,7 +415,7 @@ def main(argv: list[str] | None = None) -> None:
         default=None,
         help=(
             "Prefix for results in the HF repo. Defaults to the HF_EVAL_PREFIX env var "
-            f"if set, else the basename of --local-dir, else '{DEFAULT_HF_EVAL_PREFIX}'."
+            f"if set, else '{DEFAULT_HF_EVAL_PREFIX}'."
         ),
     )
     args = parser.parse_args(argv)
@@ -425,11 +425,7 @@ def main(argv: list[str] | None = None) -> None:
     local_dir = Path(args.local_dir)
     assert local_dir.is_dir(), f"Local directory does not exist: {local_dir}"
 
-    hf_prefix = (
-        args.hf_prefix
-        or os.environ.get("HF_EVAL_PREFIX")
-        or (local_dir.name if local_dir.name else DEFAULT_HF_EVAL_PREFIX)
-    )
+    hf_prefix = args.hf_prefix or os.environ.get("HF_EVAL_PREFIX") or DEFAULT_HF_EVAL_PREFIX
 
     # Scan
     console.print(Panel(f"Scanning [bold]{local_dir}[/bold] → HF prefix [bold]{hf_prefix}/[/bold]"))

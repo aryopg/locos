@@ -1,120 +1,93 @@
-# Retrieval Head Detection
+# LOCOS Package
 
-Standalone toolkit for identifying **retrieval heads** in transformer language
-models — attention heads that are disproportionately responsible for copying
-information from context into the model's predictions.
+`locos` contains the retrieval-head detectors, analysis scripts, plotting
+helpers, and dataset utilities used by the LOCOS release. The companion
+`locos_eval` package contains the vLLM ablation wrapper and downstream eval
+runners that consume detected heads.
 
-Detected heads are saved as JSON files consumed by LOCOS's ablation
-decoding (`locos_eval`).
+LOCOS identifies retrieval heads by scoring whether a head writes answer
+evidence through its OV path at source positions. The score is a spatial
+contrast: contribution on needle/source tokens versus contribution on
+off-source tokens. Ablation then tests whether the selected heads are causally
+important for contextual retrieval.
 
 ## Detection Methods
 
-### 1. Behavioral Retrieval Score (`detectors/behavioral.py`)
+| Method | Module | Role |
+| --- | --- | --- |
+| LOCOS | `locos.detectors.logit_contrib` | Main logit-contribution spatial scorer |
+| Attention spatial | `locos.detectors.attention_spatial` | Same spatial contrast using attention weights only |
+| DLA | `locos.detectors.dla` | Direct logit attribution without spatial contrast |
+| Wu behavioral | `locos.detectors.behavioral` | Token-match retrieval-head baseline |
+| Contrastive attention | `locos.detectors.contrastive` | Answer-contingent attention baseline |
+| HeadKV | `locos.detectors.headkv` | Anchor-window baseline |
+| CRI | `locos.detectors.cri` | Activation-patching baseline |
 
-Faithful reimplementation of
-[Wu et al. / nightdessert/Retrieval_Head](https://github.com/nightdessert/Retrieval_Head).
-Inserts a known "needle" fact into a haystack of text, then measures how much
-each attention head focuses on the needle tokens when generating the answer.
-
-```bash
-# NIAH dataset (default)
-python locos/detectors/behavioral.py \
-    --model meta-llama/Meta-Llama-3-8B-Instruct
-
-# NoLiMa dataset (harder, multi-hop probes)
-python locos/detectors/behavioral.py \
-    --model meta-llama/Meta-Llama-3-8B-Instruct --dataset nolima
-```
-
-### 2. Contrastive Detection (`detectors/contrastive.py`)
-
-Novel approach: compares attention patterns between trials with the correct
-answer present vs. absent in the context. Heads whose attention shifts
-significantly are flagged as retrieval heads.
+Run LOCOS on NoLiMa:
 
 ```bash
-python locos/detectors/contrastive.py \
-    --model meta-llama/Meta-Llama-3-8B-Instruct --dataset nolima
-```
-
-### 3. Logit-Contribution Scoring (`detectors/logit_contrib.py`)
-
-Measures whether a head's output at needle positions pushes the residual
-stream toward the correct answer token in the unembedding space. Uses a
-spatial contrast (needle vs off-needle positions) rather than temporal
-(answer vs non-answer steps). See `docs/contrastive_logit_contribution_scoring.md`.
-
-```bash
-python locos/detectors/logit_contrib.py \
-    --model meta-llama/Meta-Llama-3-8B-Instruct --dataset nolima
-```
-
-### 4. Causal Retrieval Importance (`detectors/cri.py`)
-
-Activation patching: captures each head's output on a clean forward pass,
-then patches individual heads with corrupted activations and measures the
-drop in answer log-probability.
-
-```bash
-python locos/detectors/cri.py \
-    --model meta-llama/Meta-Llama-3-8B-Instruct --dataset nolima
-```
-
-## Supporting Tools
-
-| Script | Purpose |
-|--------|---------|
-| `utils/datasets.py` | Shared dataset abstraction (`RetrievalTrial` dataclass, NIAH/NoLiMa builders, stratified sampling) |
-| `utils/common.py` | Checkpoint save/load, model loading, config extraction, head score I/O |
-| `utils/needle_utils.py` | Needle insertion & position tracking |
-| `utils/model_utils.py` | Model introspection helpers (device, attention impl, BOS detection) |
-| `download_haystack_data.py` | Download needle/haystack data for NIAH and NoLiMa probing datasets |
-| `analysis/compare_heads.py` | Compare two detection runs (e.g., NIAH vs NoLiMa, or two methods) |
-| `analysis/nolima_ablation.py` | Ablation study: mask top-N heads and measure generation quality degradation |
-| `plotting/score_dist.py` | Visualize per-head score distributions |
-| `plotting/score_buckets.py` | Heatmap of head scores bucketed by layer and head index |
-| `plotting/nolima_ablation.py` | Plot ablation study results |
-
-## Quick Start
-
-```bash
-# 1. Install dependencies (from repo root)
-pip install -e ".[eval]"
-
-# 2. Download probing data
-python locos/download_haystack_data.py --dataset all
-
-# 3. Run detection (requires GPU)
-python locos/detectors/behavioral.py \
+python -m locos.detectors.logit_contrib \
     --model meta-llama/Meta-Llama-3-8B-Instruct \
-    --dataset nolima
+    --dataset nolima \
+    --num-examples 200 \
+    --resume
+```
 
-# 4. Output: retrieval_heads/Meta-Llama-3-8B-Instruct_nolima.json
+Run the attention-only spatial control:
+
+```bash
+python -m locos.detectors.attention_spatial \
+    --model meta-llama/Meta-Llama-3-8B-Instruct \
+    --dataset nolima \
+    --num-examples 200 \
+    --resume
 ```
 
 ## Output Format
 
-Each detection method outputs a JSON file mapping `"layer-head"` keys to
-per-trial score lists:
+Detectors write JSON files under `retrieval_heads/` by default. LOCOS outputs
+usually follow this pattern:
+
+```text
+retrieval_heads/<ModelName>_logit_contrib_nolima.json
+```
+
+Each file maps `"layer-head"` keys to per-trial score lists, with optional
+metadata depending on the detector:
 
 ```json
 {
-  "0-5":  [0.92, 0.88, 0.91, ...],
-  "3-12": [0.78, 0.81, 0.75, ...],
-  ...
+  "0-5": [0.92, 0.88, 0.91],
+  "3-12": [0.78, 0.81, 0.75]
 }
 ```
 
-These files are loaded by `locos_eval.retrieval_heads.load_retrieval_heads()`
-for use in contrastive decoding.
+Load heads for ablation with `locos_eval.retrieval_heads.load_retrieval_heads()`:
 
-## Dependencies
+```python
+from locos_eval import load_retrieval_heads
 
-Requires GPU access and the following packages (beyond `locos_eval` base):
+heads = load_retrieval_heads(
+    "retrieval_heads/Meta-Llama-3-8B-Instruct_logit_contrib_nolima.json",
+    num_heads=50,
+)
+```
 
-- `transformers` (model loading with `output_attentions=True`)
-- `torch`
-- `rouge-score` (needle detection scoring)
-- `numpy`
-- `rich` (progress bars and tables)
-- `matplotlib` (plotting scripts only)
+## Supporting Modules
+
+| Path | Purpose |
+| --- | --- |
+| `utils/datasets.py` | Shared NIAH/NoLiMa trial builders and stratified sampling |
+| `utils/common.py` | Checkpoint save/load, model loading, and head score I/O |
+| `utils/needle_utils.py` | Needle insertion and source-position tracking |
+| `utils/model_utils.py` | Model introspection helpers |
+| `analysis/nolima_ablation.py` | NoLiMa/NIAH ablation sweeps |
+| `analysis/parametric_ablation.py` | Parametric and arithmetic specificity controls |
+| `plotting/` | Figure generation helpers |
+
+## Reproducibility
+
+Public heads, ablation outputs, downstream outputs, and manifests live in the
+HuggingFace dataset repo `aryopg/locos-results`. See the root
+`REPRODUCING.md` and `experiments/manifest.yaml` for the release artifact
+layout and figure regeneration commands.

@@ -1,0 +1,343 @@
+"""Shared utilities for E1–E9 analysis scripts."""
+
+from __future__ import annotations
+
+import json
+import os
+import sys
+from pathlib import Path
+from typing import NamedTuple
+
+import numpy as np
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+# External results directory (sibling of repo, or env-override via LOCOS_RESULTS_DIR)
+_LOCOS_RESULTS = Path(os.environ.get("LOCOS_RESULTS_DIR", str(_REPO_ROOT.parent / "locos-results")))
+
+# Ordered list of directories to search for score files
+_SCORE_DIRS: list[Path] = [
+    _REPO_ROOT / "retrieval_heads",
+    _LOCOS_RESULTS / "retrieval_heads",
+]
+
+# Ordered list of base directories for downstream eval results
+_DOWNSTREAM_DIRS: list[Path] = [
+    _REPO_ROOT / "downstream_results",
+    _LOCOS_RESULTS / "downstream_results",
+    _REPO_ROOT / "eval_results",
+    _LOCOS_RESULTS / "eval_results",
+]
+
+HF_RESULTS_REPO = "aryopg/locos-results"
+# HF path prefix used by eval_babilong.sh / sync_results.py (OUTPUT_DIR default)
+HF_DOWNSTREAM_PREFIX = "downstream_results"
+
+_hf_downstream_files_cache: set[str] | None = None
+
+
+def _get_hf_downstream_files() -> set[str]:
+    global _hf_downstream_files_cache
+    if _hf_downstream_files_cache is None:
+        from huggingface_hub import list_repo_files
+
+        _hf_downstream_files_cache = set(list_repo_files(HF_RESULTS_REPO, repo_type="dataset"))
+    return _hf_downstream_files_cache
+
+
+def load_downstream_from_hf(
+    task_key: str,
+    model: str,
+    variants: list[str],
+    seeds: tuple[str, ...] = ("", "_s1", "_s2", "_s3"),
+) -> list[dict] | None:
+    """Download downstream eval JSONL rows from HF.
+
+    Handles ``downstream_results/`` prefix and timestamped ``results_*.jsonl`` filenames
+    produced by sync_results.py (eval_babilong.sh default HF_EVAL_PREFIX).
+    Also tries bare paths (no prefix) for backwards compatibility.
+    """
+    slug = model.replace("/", "_")
+    try:
+        from huggingface_hub import hf_hub_download
+
+        all_files = _get_hf_downstream_files()
+    except Exception:
+        return None
+
+    for variant in variants:
+        for seed in seeds:
+            v = f"{variant}{seed}"
+            for pfx in (
+                f"{HF_DOWNSTREAM_PREFIX}/{task_key}/{slug}/{v}/",
+                f"{task_key}/{slug}/{v}/",
+            ):
+                candidates = sorted(
+                    [f for f in all_files if f.startswith(pfx) and f.endswith(".jsonl")],
+                    reverse=True,
+                )
+                for fname in candidates:
+                    try:
+                        cached = hf_hub_download(
+                            repo_id=HF_RESULTS_REPO,
+                            filename=fname,
+                            repo_type="dataset",
+                        )
+                        rows: list[dict] = []
+                        with open(cached) as fp:
+                            for line in fp:
+                                if line.strip():
+                                    rows.append(json.loads(line))
+                        if rows:
+                            return rows
+                    except Exception:
+                        continue
+    return None
+
+
+ALL_MODELS: list[str] = [
+    "Qwen/Qwen3-8B",
+    "Qwen/Qwen3-14B",
+    "Qwen/Qwen3-32B",
+    "google/gemma-3-12b-it",
+    "google/gemma-3-27b-it",
+    "allenai/Olmo-3.1-32B-Instruct",
+]
+
+MODEL_SHORT: dict[str, str] = {m: m.split("/")[-1] for m in ALL_MODELS}
+
+MODEL_LABELS: dict[str, str] = {
+    "Qwen/Qwen3-8B": "Qwen3-8B",
+    "Qwen/Qwen3-14B": "Qwen3-14B",
+    "Qwen/Qwen3-32B": "Qwen3-32B",
+    "google/gemma-3-12b-it": "Gemma3-12B",
+    "google/gemma-3-27b-it": "Gemma3-27B",
+    "allenai/Olmo-3.1-32B-Instruct": "Olmo3.1-32B",
+}
+
+# Models where Wu ablation *raised* BABILong accuracy (E6 targeted contrast)
+E6_AFFECTED_MODELS: list[str] = [
+    "Qwen/Qwen3-14B",
+    "google/gemma-3-27b-it",
+    "allenai/Olmo-3.1-32B-Instruct",
+]
+
+# k values used in ablation sweeps
+ABLATION_K_VALUES = [1, 5, 10, 20, 50]
+
+# k values for Jaccard overlap curves
+JACCARD_K_VALUES = [1, 5, 10, 20, 30, 50, 75, 100]
+
+
+class ScoreFile(NamedTuple):
+    """Loaded score file content."""
+
+    scores: dict[str, list[float]]  # "layer-head" → per-trial scores
+    trial_ids: list[str]  # passed trial ids (empty for behavioral.py format)
+    meta: dict  # metadata (empty for behavioral.py format)
+
+
+def _candidate_filenames(short: str, method: str, dataset: str) -> list[str]:
+    """Return candidate filenames in priority order for a given score file."""
+    if method == "locos":
+        suffix = "_nolima" if dataset == "nolima" else ""
+        return [f"{short}_logit_contrib{suffix}.json"]
+    if method == "alpha_spatial":
+        suffix = "_nolima" if dataset == "nolima" else ""
+        return [f"{short}_attention_spatial{suffix}.json"]
+    if method == "wu":
+        # New naming (generated by behavioral.py with explicit dataset tag)
+        candidates = [f"{short}_wu_{dataset}.json"]
+        # Legacy naming: niah → {short}.json, nolima → {short}_nolima.json
+        legacy_suffix = f"_{dataset}" if dataset != "niah" else ""
+        legacy = f"{short}{legacy_suffix}.json"
+        if legacy not in candidates:
+            candidates.append(legacy)
+        return candidates
+    raise ValueError(f"Unknown method: {method!r}")
+
+
+def _hf_path(model: str, method: str, dataset: str) -> str:
+    """HF repo-relative path for a score file (canonical / primary name)."""
+    short = MODEL_SHORT[model]
+    names = _candidate_filenames(short, method, dataset)
+    return f"retrieval_heads/{names[0]}"
+
+
+def load_score_file(
+    model: str,
+    method: str,
+    dataset: str,
+    *,
+    download: bool = True,
+) -> ScoreFile | None:
+    """Load a detector score file from local disk, downloading from HF if needed.
+
+    Searches all _SCORE_DIRS for each candidate filename in priority order.
+
+    Args:
+        model: Full HF model name (e.g. "Qwen/Qwen3-8B").
+        method: One of "locos", "alpha_spatial", "wu".
+        dataset: One of "niah", "nolima".
+        download: If True, attempt HF download when no local file found.
+
+    Returns:
+        ScoreFile or None if not found.
+    """
+    short = MODEL_SHORT[model]
+    candidates = _candidate_filenames(short, method, dataset)
+
+    # Search all score directories for any candidate filename
+    found: Path | None = None
+    for score_dir in _SCORE_DIRS:
+        for fname in candidates:
+            p = score_dir / fname
+            if p.exists():
+                found = p
+                break
+        if found:
+            break
+
+    if found is None and download:
+        try:
+            from huggingface_hub import hf_hub_download
+
+            hf_p = _hf_path(model, method, dataset)
+            cached = hf_hub_download(repo_id=HF_RESULTS_REPO, filename=hf_p, repo_type="dataset")
+            dest = _SCORE_DIRS[0] / candidates[0]
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            import shutil
+
+            shutil.copy2(cached, dest)
+            found = dest
+        except Exception:
+            return None
+
+    if found is None:
+        return None
+
+    with open(found) as f:
+        data = json.load(f)
+
+    if "scores" in data and isinstance(data["scores"], dict):
+        # logit_contrib / attention_spatial format
+        return ScoreFile(
+            scores=data["scores"],
+            trial_ids=data.get("trial_ids", []),
+            meta=data.get("meta", {}),
+        )
+    # behavioral.py format: plain dict
+    return ScoreFile(scores=data, trial_ids=[], meta={})
+
+
+def mean_scores(sf: ScoreFile) -> dict[str, float]:
+    """Compute mean score per head."""
+    return {k: float(np.mean(v)) if v else 0.0 for k, v in sf.scores.items()}
+
+
+def top_k_heads(scores_dict: dict[str, float], k: int) -> set[tuple[int, int]]:
+    """Return top-k heads by score as set of (layer, head) tuples."""
+    ranked = sorted(scores_dict.items(), key=lambda x: x[1], reverse=True)
+    result = set()
+    for key, _ in ranked[:k]:
+        l, h = key.split("-")
+        result.add((int(l), int(h)))
+    return result
+
+
+def jaccard(a: set, b: set) -> float:
+    if not a and not b:
+        return 1.0
+    return len(a & b) / len(a | b)
+
+
+def bootstrap_ci(
+    values: list[float],
+    B: int = 1000,
+    seed: int = 42,
+    alpha: float = 0.05,
+) -> tuple[float, float]:
+    """Bootstrap percentile CI for the mean."""
+    rng = np.random.default_rng(seed)
+    arr = np.array(values, dtype=float)
+    if len(arr) == 0:
+        return (float("nan"), float("nan"))
+    boots = rng.choice(arr, size=(B, len(arr)), replace=True).mean(axis=1)
+    lo = float(np.percentile(boots, 100 * alpha / 2))
+    hi = float(np.percentile(boots, 100 * (1 - alpha / 2)))
+    return lo, hi
+
+
+def get_output_dir(exp_id: str) -> Path:
+    """Create and return analysis/outputs/<exp_id>/."""
+    d = _REPO_ROOT / "analysis" / "outputs" / exp_id
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def load_eval_rows(
+    task_key: str,
+    model: str,
+    variants: list[str],
+    seeds: tuple[str, ...] = ("", "_s1", "_s2", "_s3"),
+) -> list[dict] | None:
+    """Load JSONL eval rows for (task_key, model) from local downstream result dirs.
+
+    Tries each base dir in _DOWNSTREAM_DIRS, each variant+seed combo, and globs
+    for timestamped `results_*.jsonl` files (runner saves as results_{ts}.jsonl).
+
+    Returns the first non-empty row list found, or None.
+    """
+    slug = model.replace("/", "_")
+    for base in _DOWNSTREAM_DIRS:
+        for variant in variants:
+            for seed in seeds:
+                v = f"{variant}{seed}"
+                variant_dir = base / task_key / slug / v
+                if not variant_dir.is_dir():
+                    continue
+                # Prefer latest timestamped file; fall back to any results file
+                files = sorted(variant_dir.glob("results_*.jsonl"), reverse=True)
+                if not files:
+                    files = sorted(variant_dir.glob("results*.jsonl"), reverse=True)
+                for fp in files:
+                    rows = []
+                    with open(fp) as f:
+                        for line in f:
+                            if line.strip():
+                                rows.append(json.loads(line))
+                    if rows:
+                        return rows
+    return None
+
+
+def rbo(ranked_a: list, ranked_b: list, p: float = 0.9) -> float:
+    """Rank-Biased Overlap (Webber et al. 2010), extrapolated variant.
+
+    Args:
+        ranked_a: List of items ordered by score (best first).
+        ranked_b: List of items ordered by score (best first).
+        p: Persistence parameter (0 < p < 1). Higher = deeper lists matter more.
+
+    Returns:
+        RBO score in [0, 1].
+    """
+    if not ranked_a and not ranked_b:
+        return 1.0
+    set_a: set = set()
+    set_b: set = set()
+    score = 0.0
+    for d, (a, b) in enumerate(zip(ranked_a, ranked_b), start=1):
+        set_a.add(a)
+        set_b.add(b)
+        agreement = len(set_a & set_b) / d
+        score += (p ** (d - 1)) * agreement
+    score *= 1 - p
+    # Extrapolation tail
+    depth = min(len(ranked_a), len(ranked_b))
+    if depth > 0:
+        last_agree = len(set_a & set_b) / depth
+        score += (p**depth) * last_agree
+    return float(score)

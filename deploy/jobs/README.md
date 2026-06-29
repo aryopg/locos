@@ -19,7 +19,10 @@ The launcher exports these before running your script:
 | `HEADS` | Retrieval heads JSON path relative to repo root |
 | `GPUS` | Number of GPUs allocated (equals TP size) |
 | `MODEL_SLUG` | Short model name for paths (e.g., `meta-llama-3-8b-instruct`) |
-| `HF_RESULTS_REPO` | HuggingFace repo for uploading results |
+| `HF_RESULTS_REPO` | HuggingFace dataset repo for uploading results |
+
+Use `HF_RESULTS_REPO=aryopg/locos-results` for public artifacts. Downstream
+eval jobs upload to the `downstream_results/` prefix in the same repo.
 
 Set any script-specific variables in the shell before invoking the script.
 Large result directories should be uploaded or copied before cleaning the
@@ -50,8 +53,9 @@ python scripts/upload_results.py ./results_dir \
 | `eval_xsum.sh` | XSum summarization eval (ROUGE-L, BERTScore, FactKB) |
 | `eval_medrag.sh` | MedRAG medical QA eval (5 sub-datasets, MCQ accuracy) |
 | `eval_aci_bench.sh` | ACI-Bench dialogue-to-note eval (ROUGE-L, BERTScore, LLM judge) |
-| `detect_logit_contrib.sh` | Contrastive logit-contribution retrieval head detection |
-| `detect_contrastive.sh` | Contrastive attention-based retrieval head detection |
+| `detect_logit_contrib.sh` | LOCOS write-aware OV logit-contribution retrieval head detection |
+| `detect_contrastive.sh` | Contrastive attention scoring baseline |
 | `detect_cri.sh` | Causal Retrieval Importance via activation patching |
+| `detect_dla.sh` | Direct logit attribution baseline: LOCOS without spatial contrast |
 | `detect_retrieval_heads.sh` | Original Wu et al. retrieval head detection |
 | `ablation_nolima.sh` | NoLiMa retrieval performance ablation with varying head selections |

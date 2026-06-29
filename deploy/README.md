@@ -47,7 +47,10 @@ Common environment variables:
 | `HEADS` | Retrieval-head JSON path relative to the repo root, or `random` where supported |
 | `GPUS` | Number of GPUs to use; also passed as tensor parallel size |
 | `MODEL_SLUG` | Short model name for output paths |
-| `HF_RESULTS_REPO` | HuggingFace repo for uploading results |
+| `HF_RESULTS_REPO` | HuggingFace dataset repo for heads, ablations, downstream results, and logs |
+
+The canonical public artifact repo is `aryopg/locos-results`. Downstream evals
+sync under the `downstream_results/` prefix in that repo.
 
 See `deploy/jobs/README.md` for the full template and the list of available
 scripts.

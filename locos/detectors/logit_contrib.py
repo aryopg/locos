@@ -19,7 +19,7 @@ off-needle) rather than temporal (answer vs non-answer steps).
 Per-trial score: S^tau = L+ - L- where L+ sums phi over needle positions
 and L- sums over off-needle positions (rescaled by span length ratio).
 
-See docs/contrastive_logit_contribution_scoring.md for the full derivation.
+See the root README and REPRODUCING.md for the public method and artifact guide.
 
 Usage:
     # Quick test with NoLiMa
@@ -966,7 +966,7 @@ def main():
             "HuggingFace repo ID for a pretrained tuned lens (e.g. "
             "'uzaymacar/gemma-3-27b-tuned-lens'). Downloads translators.pt "
             "and applies affine correction to unembedding projections per layer. "
-            "See docs/h3_direct_path_bias.md for motivation."
+            "Use this when comparing LOCOS against direct-logit-attribution controls."
         ),
     )
     parser.add_argument(

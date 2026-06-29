@@ -15,7 +15,7 @@ ensure_heads "${HEADS:-}"
 if [[ "${FORCE:-}" != "true" ]]; then
     check_exit=0
     python scripts/check_experiment.py \
-        --repo-id "${HF_DOWNSTREAM_REPO}" \
+        --repo-id "${HF_RESULTS_REPO}" \
         --task xsum_faithfulness \
         --model "${MODEL}" \
         --decoding "${DECODING}" \
@@ -47,5 +47,6 @@ HEADS_LABEL="${HEADS_LABEL:-}" \
 
 echo "=== Syncing results to HF ==="
 python scripts/sync_results.py \
-    --repo-id "${HF_DOWNSTREAM_REPO}" \
-    --local-dir ./eval_results || echo "WARNING: sync_results.py failed — results saved locally but NOT uploaded to HF" >&2
+    --repo-id "${HF_RESULTS_REPO}" \
+    --local-dir ./eval_results \
+    --hf-prefix downstream_results || echo "WARNING: sync_results.py failed — results saved locally but NOT uploaded to HF" >&2

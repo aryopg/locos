@@ -27,6 +27,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-cov",
     "pytest-mock",
     "pytest-asyncio",
     "pre-commit",
@@ -42,10 +43,25 @@ medrag-build = ["rank-bm25"]
 where = ["."]
 include = ["locos_eval*", "locos*"]
 
+[tool.setuptools.package-data]
+locos = ["analysis/prompts/*.yaml"]
+locos_eval = ["evals/configs/*.yaml", "evals/prompts/*.yaml"]
+
 [tool.pytest.ini_options]
 markers = [
     "gpu: tests that require a GPU (deselect with '-m not gpu')",
 ]
+
+[tool.coverage.run]
+source = ["locos", "locos_eval", "scripts"]
+omit = [
+    "locos/notebooks/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
 
 # --- Linting & Formatting ---
 

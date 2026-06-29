@@ -1,0 +1,132 @@
+artifact_repo: aryopg/locos-results
+default_results_root: ../locos-results
+python: python3.11
+
+models:
+  headline:
+    - Qwen/Qwen3-8B
+    - Qwen/Qwen3-14B
+    - Qwen/Qwen3-32B
+    - google/gemma-3-12b-it
+    - google/gemma-3-27b-it
+    - allenai/Olmo-3.1-32B-Instruct
+
+defaults:
+  heads_method: logit_contrib
+  detection_dataset: nolima
+  nolima_variant: needle_set
+  question_type: onehop
+  detection_seed: 42
+  ablation_seed: 42
+  random_head_seeds: [42, 43, 44]
+  k_values: [1, 5, 10, 20, 50, 100]
+  ablation_mode: mean
+  num_calibration: 50
+  rouge_correctness_filter: "ROUGE-1 recall * 100 > 50"
+  downstream_num_heads: 50
+  downstream_sampling:
+    temperature: 0.0
+    top_p: 1.0
+    top_k: -1
+
+figures:
+  - id: logit_contrib_overview
+    public_assets:
+      - web/assets/logit_contrib_overview.png
+      - web/assets/logit_contrib_overview.pdf
+    inputs:
+      - retrieval_heads/Qwen3-8B_attention_spatial_nolima.json
+      - retrieval_heads/Qwen3-8B_logit_contrib_nolima.json
+    command: >-
+      python -m locos.plotting.logit_contrib_overview
+      --attn-json ../locos-results/retrieval_heads/Qwen3-8B_attention_spatial_nolima.json
+      --logit-json ../locos-results/retrieval_heads/Qwen3-8B_logit_contrib_nolima.json
+      --output web/assets/logit_contrib_overview.pdf
+
+  - id: ablation_nolima_topk_6models
+    public_assets:
+      - web/assets/ablation_nolima_topk_6models.png
+      - web/assets/ablation_nolima_topk_6models.pdf
+    inputs:
+      - ablation_results/nolima_ablation_*_logit_contrib*.json
+      - ablation_results/nolima_ablation_*_wu*.json
+      - ablation_results/nolima_ablation_*_random*.json
+    command: >-
+      python -m locos.plotting.nolima_ablation
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-14B_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-32B_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_gemma-3-12b-it_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_gemma-3-27b-it_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_Olmo-3.1-32B-Instruct_logit_contrib_nolima.json
+      --out web/assets/ablation_nolima_topk_6models.pdf
+
+  - id: ablation_nolima_locos_vs_att_spatial_6models
+    public_assets:
+      - web/assets/ablation_nolima_locos_vs_att_spatial_6models.png
+      - web/assets/ablation_nolima_locos_vs_att_spatial_6models.pdf
+    inputs:
+      - ablation_results/nolima_ablation_*_logit_contrib*.json
+      - ablation_results/nolima_ablation_*_attention_spatial*.json
+    command: >-
+      python -m locos.plotting.nolima_ablation
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_attention_spatial_nolima.json
+      --out web/assets/ablation_nolima_locos_vs_att_spatial_6models.pdf
+
+  - id: ablation_nolima_topk_vs_bottomk_3models
+    public_assets:
+      - web/assets/ablation_nolima_topk_vs_bottomk_3models.png
+      - web/assets/ablation_nolima_topk_vs_bottomk_3models.pdf
+    inputs:
+      - ablation_results/nolima_ablation_*_logit_contrib*.json
+      - ablation_results/nolima_ablation_*_bottomk*.json
+      - ablation_results/nolima_ablation_*_random*.json
+    command: >-
+      python -m locos.plotting.nolima_ablation
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_logit_contrib_nolima_bottomk.json
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_random_seed42.json
+      --out web/assets/ablation_nolima_topk_vs_bottomk_3models.pdf
+
+  - id: ablation_parametric_nolima_topk_ds_3models
+    public_assets:
+      - web/assets/ablation_parametric_nolima_topk_ds_3models.png
+      - web/assets/ablation_parametric_nolima_topk_ds_3models.pdf
+    inputs:
+      - ablation_results/nolima_ablation_*_logit_contrib*.json
+      - ablation_parametric_results/parametric_ablation_*_logit_contrib*.json
+      - ablation_parametric_results/parametric_ablation_*_random*.json
+    command: >-
+      python -m locos.plotting.dissociation_score
+      --nolima ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_logit_contrib_nolima.json
+      ../locos-results/ablation_results/nolima_ablation_Qwen3-8B_random_seed42.json
+      --parametric ../locos-results/ablation_parametric_results/parametric_ablation_Qwen3-8B_logit_contrib_nolima.json
+      ../locos-results/ablation_parametric_results/parametric_ablation_Qwen3-8B_random_seed42.json
+      --labels LOCOS Random
+      --dual
+      --out web/assets/ablation_parametric_nolima_topk_ds_3models.pdf
+
+  - id: downstream_performance
+    public_assets:
+      - web/assets/downstream_performance.png
+      - web/assets/downstream_performance.pdf
+    inputs:
+      - downstream_results/babilong/**/*.jsonl
+      - downstream_results/musique/**/*.jsonl
+      - downstream_results/**/manifest.json
+    command: >-
+      LOCOS_DOWNSTREAM_DIR=../locos-results/downstream_results
+      python -m locos.plotting.babilong_bar --out-dir web/assets/downstream_babilong
+
+downstream_tasks:
+  babilong:
+    command_module: locos_eval.evals.tasks.babilong_task
+    subset: qa2
+    split: 0k
+    metrics: [exact_match]
+  musique:
+    command_module: locos_eval.evals.tasks.musique_task
+    subset: answerable
+    split: validation
+    metrics: [exact_match, f1]

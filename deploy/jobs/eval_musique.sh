@@ -23,7 +23,7 @@ TASK_NAME="musique_${SUBSET}"
 if [[ "${FORCE:-}" != "true" ]]; then
     check_exit=0
     python scripts/check_experiment.py \
-        --repo-id "${HF_DOWNSTREAM_REPO}" \
+        --repo-id "${HF_RESULTS_REPO}" \
         --task "${TASK_NAME}" \
         --model "${MODEL}" \
         --decoding "${DECODING}" \
@@ -60,6 +60,6 @@ OUTPUT_DIR="${OUTPUT_DIR}" \
 
 echo "=== Syncing results to HF (prefix=${HF_EVAL_PREFIX}) ==="
 python scripts/sync_results.py \
-    --repo-id "${HF_DOWNSTREAM_REPO}" \
+    --repo-id "${HF_RESULTS_REPO}" \
     --local-dir "./${OUTPUT_DIR}" \
     --hf-prefix "${HF_EVAL_PREFIX}" || echo "WARNING: sync_results.py failed — results saved locally but NOT uploaded to HF" >&2

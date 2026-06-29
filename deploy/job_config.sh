@@ -11,15 +11,9 @@
 # ---------------------------------------------------------------------------
 
 DOCKER_IMAGE="runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404"
-# HF_RESULTS_REPO holds heads files, detection JSONs, ablation analyses, and job
-# logs (everything except downstream eval results). Stable target — the broken
-# native-ablation runs from before the eager-mode fix did NOT pollute it.
+# HF_RESULTS_REPO holds heads files, detection JSONs, ablation analyses,
+# downstream eval results, and job logs.
 HF_RESULTS_REPO="${HF_RESULTS_REPO:-aryopg/locos-results}"
-# HF_DOWNSTREAM_REPO holds task-level eval outputs (NQ-Swap, MuSiQue, MedRAG,
-# LongBench-v2, BABILong, ACI-Bench, XSum). Split out from HF_RESULTS_REPO so
-# that re-runs after the enforce_eager fix start fresh and the broken
-# zero-effect ablation results from before that fix can't contaminate them.
-HF_DOWNSTREAM_REPO="${HF_DOWNSTREAM_REPO:-aryopg/locos_downstream_results}"
 
 # Model → GPU count lookup (bash 3.2 compatible — no associative arrays)
 gpu_count_for_model() {
@@ -201,7 +195,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Clone and install
 git clone --depth 1 https://${GIT_TOKEN}@github.com/aryopg/locos.git
-cd locos_eval
+cd locos
 uv venv --python python3.12 --system-site-packages
 UV_HTTP_TIMEOUT=300 uv pip install -e ".[dev,eval]" \
     --extra-index-url https://download.pytorch.org/whl/cu128 \
@@ -250,7 +244,6 @@ export HEADS='${heads}'
 export GPUS='${gpus}'
 export MODEL_SLUG='${mslug}'
 export HF_RESULTS_REPO='${HF_RESULTS_REPO}'
-export HF_DOWNSTREAM_REPO='${HF_DOWNSTREAM_REPO}'
 export PYTHONUNBUFFERED=1
 $(for env_pair in "$@"; do echo "export ${env_pair}"; done)
 

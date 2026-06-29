@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Reorganize HuggingFace repo: flatten model-slug directories into top-level result dirs.
+"""Historical migration helper for the LOCOS HuggingFace results repo.
+
+Reorganize HuggingFace repo: flatten model-slug directories into top-level result dirs.
 
 Moves files from:
     <model_slug>/ablation_results/...       → ablation_results/...
@@ -9,8 +11,9 @@ Moves files from:
 Deletes:
     <model_slug>/logs/...
 
-This is a one-time migration script. After running, model-slug directories at the
-repo root should be empty and only the flat top-level directories remain.
+This is a one-time migration script retained for auditability. New result
+artifacts should be written directly to the canonical top-level directories in
+``aryopg/locos-results``.
 
 Usage::
 
@@ -31,7 +34,13 @@ from rich.table import Table
 console = Console()
 
 # Known top-level directories that are already correctly structured
-KNOWN_GOOD_PREFIXES = {"ablation_results", "ablation_parametric_results", "eval_results", "retrieval_heads"}
+KNOWN_GOOD_PREFIXES = {
+    "ablation_results",
+    "ablation_parametric_results",
+    "downstream_results",
+    "eval_results",
+    "retrieval_heads",
+}
 
 # Result subdirectories inside model-slug dirs that should be flattened
 RESULT_SUBDIRS = {"ablation_results", "ablation_parametric_results", "retrieval_heads"}
