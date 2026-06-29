@@ -28,9 +28,9 @@
 
     /* ── Nav ── */
     header {
-      min-height: 82vh;
       display: grid;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto auto;
+      padding-bottom: 44px;
       border-bottom: var(--line);
     }
     nav {
@@ -76,6 +76,7 @@
       margin: 0 0 8px;
       line-height: 1.7;
     }
+    .affiliations code { overflow-wrap: anywhere; }
     .hero-links {
       display: flex;
       gap: 18px;
@@ -256,8 +257,25 @@
     footer { padding: 28px 0 0; font-size: 15px; color: var(--muted); }
 
     @media (max-width: 760px) {
-      header { min-height: 74vh; }
+      header { padding-bottom: 34px; }
+      .wrap { overflow-x: hidden; }
       nav { align-items: flex-start; flex-direction: column; }
+      .paper-title { overflow-wrap: break-word; }
+      .authors {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 14px;
+        row-gap: 2px;
+        line-height: 1.55;
+      }
+      .affiliations { overflow-wrap: anywhere; }
+      .affiliations code { word-break: break-all; }
+      .hero-links { gap: 12px; }
+      .hero-links a,
+      .hero-links .link-disabled {
+        max-width: 100%;
+        justify-content: center;
+      }
       .grid, .figure-row, .steps { grid-template-columns: 1fr; }
       .step { border-right: none; border-bottom: var(--line); border-top: none; border-left: 5px solid transparent; }
       .step-read    { border-left-color: var(--red); }
