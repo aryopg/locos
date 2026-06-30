@@ -4,7 +4,7 @@
 Examples::
 
     # Upload Inspect AI eval logs
-    python scripts/upload_results.py ./logs/2024-01-15T10_30_00_medrag \\
+    python scripts/upload_results.py ./logs/2024-01-15T10_30_00_babilong \\
         --repo-id aryopg/locos-results
 
     # Upload retrieval heads with a custom subfolder

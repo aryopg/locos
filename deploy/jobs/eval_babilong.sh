@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Eval: BABILong free-form QA (subsets qa2, qa3 by default; split 0k)
 #
-# Iterates the requested subsets and runs each as a separate task. Skip-if-done
-# and per-subset HF sync mirror eval_medrag.sh.
+# Iterates the requested subsets and runs each as a separate task, with
+# skip-if-done and per-subset HF sync.
 set -euo pipefail
+
+# Shared helpers (ensure_heads, model registry). Run from the repo root.
+source deploy/job_config.sh
 
 DECODING="${DECODING:-ablation}"
 ABLATION_MODE="${ABLATION_MODE:-zero}"

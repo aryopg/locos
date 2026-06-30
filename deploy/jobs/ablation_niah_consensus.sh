@@ -22,6 +22,9 @@
 #   LIMIT              Optional --limit passed through for smoke tests.
 set -euo pipefail
 
+# Shared helpers (ensure_heads, model registry). Run from the repo root.
+source deploy/job_config.sh
+
 ABLATION_MODE="${ABLATION_MODE:-mean}"
 MAX_LENGTH="${MAX_LENGTH:-5000}"
 NUM_LENGTHS="${NUM_LENGTHS:-10}"

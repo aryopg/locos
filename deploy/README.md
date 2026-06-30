@@ -20,7 +20,7 @@ HEADS="retrieval_heads/Meta-Llama-3-8B-Instruct.json" \
 GPUS=1 \
 MODEL_SLUG="meta-llama-3-8b-instruct" \
 HF_RESULTS_REPO="aryopg/locos-results" \
-./deploy/jobs/eval_nq_swap.sh
+./deploy/jobs/eval_babilong.sh
 ```
 
 ## File Overview

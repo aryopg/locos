@@ -29,7 +29,6 @@ def test_migrated_revision_modules_importable():
         "locos.plotting._downstream_bar_common",
         "locos.plotting.babilong_bar",
         "locos.plotting.musique_bar",
-        "locos.plotting.medrag_bar",
     ]
     for module in modules:
         importlib.import_module(module)

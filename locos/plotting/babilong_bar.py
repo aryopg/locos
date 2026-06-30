@@ -33,8 +33,8 @@ from rich.console import Console
 from locos.plotting._downstream_bar_common import (
     render_multi_metric_domain_bars,
 )
+from locos.plotting._downstream_common import MODEL_ORDER
 from locos.plotting._paths import default_downstream_results_root
-from locos.plotting.longbench_v2_radar import MODEL_ORDER
 
 console = Console()
 

@@ -37,7 +37,6 @@ dev = [
     "vulture",
 ]
 eval = ["datasets>=3.0", "rouge-score", "bert-score", "tqdm"]
-medrag-build = ["rank-bm25"]
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -5,10 +5,8 @@
 #   ./scripts/eval/run_eval.sh <task_module> [extra args...]
 #
 # Examples:
-#   ./scripts/eval/run_eval.sh nq_swap_task --limit 100
-#   ./scripts/eval/run_eval.sh medrag_task --dataset-name medqa --limit 100
-#   ./scripts/eval/run_eval.sh xsum_task --limit 50
-#   ./scripts/eval/run_eval.sh aci_bench_task --n-shot 2 --judge-model claude-haiku-4-5-20251001
+#   ./scripts/eval/run_eval.sh babilong_task --limit 100
+#   ./scripts/eval/run_eval.sh musique_task --limit 100
 #
 # Environment variables:
 #   MODEL                   HuggingFace model name (default: meta-llama/Meta-Llama-3-8B-Instruct)

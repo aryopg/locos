@@ -82,12 +82,10 @@ This repository contains two packages:
   - runner.py: EvalRunner base class (model loading, generation loop, scoring, JSONL output)
   - scorers.py: pure scoring functions (ROUGE-L, BERTScore, MCQ extraction,
     subspan match, LLM judge via Anthropic SDK)
-  - tasks/nq_swap_task.py: NQ-Swap context faithfulness (sub_EM, org_EM)
-  - tasks/medrag_task.py: MedRAG medical QA (MCQ accuracy, 5 sub-datasets)
-  - tasks/xsum_task.py: XSum summarization (ROUGE-L, BERTScore, FactKB)
-  - tasks/aci_bench_task.py: ACI-Bench D2N dialogue-to-note
-    (ROUGE-L, BERTScore, LLM-judge with Anthropic SDK)
-  - tasks/longbench_v2_task.py: LongBench-v2 long-context MCQ
+  - tasks/babilong_task.py: BABILong long-context free-form QA
+    (long-context extension of bAbI; non-literal multi-fact reasoning)
+  - tasks/musique_task.py: MuSiQue multi-hop open-book QA
+    (2-4 fact composition over distractor paragraphs)
   - Generation checkpointing: outputs saved per-sample, auto-resumes on restart
   - Score-only mode: --score-only <generations.jsonl> reruns scoring without GPU
   - Prompts stored in evals/prompts/*.yaml (editable without code changes)
@@ -112,8 +110,8 @@ Deploy infrastructure (deploy/):
   - job_config.sh: shared model registry (MODEL_SHORT → HF name), GPU count helpers,
     and reusable setup commands
   - model_sampling.yaml: per-model recommended sampling parameters for stochastic runs
-  - jobs/: per-task/detector shell scripts (eval_nq_swap.sh, eval_medrag.sh,
-    eval_xsum.sh, eval_aci_bench.sh, eval_longbench_v2.sh, detect_retrieval_heads.sh,
+  - jobs/: per-task/detector shell scripts (eval_babilong.sh, eval_musique.sh,
+    detect_retrieval_heads.sh,
     detect_contrastive.sh, detect_cri.sh, detect_logit_contrib.sh,
     detect_attention_spatial.sh, detect_headkv.sh, ablation_nolima.sh,
     ablation_nolima_random.sh, ablation_parametric.sh, ablation_parametric_random.sh)
@@ -169,10 +167,8 @@ Retrieval head detection (locos/):
 Scripts (organized in scripts/):
   scripts/eval/:
     - run_eval.sh: convenience wrapper for standalone eval tasks
-    - build_medrag_dataset.py: offline BM25 retrieval for MedRAG datasets
     - build_parametric_and_arithmetic_dataset.py: build parametric recall + arithmetic
       eval dataset (City-Country, PopQA, Arithmetic) and upload to HuggingFace
-    - explore_acibench_results.py: Streamlit app for exploring ACI-Bench results
   scripts/ (root):
     - upload_results.py: upload result directories to HuggingFace Hub
     - sync_results.py: smart HF sync with per-experiment manifests
@@ -187,7 +183,6 @@ Scripts (organized in scripts/):
 Install groups (pyproject.toml):
   - [dev]: pytest, pytest-mock, pytest-asyncio, pre-commit, ruff, black, isort, vulture
   - [eval]: datasets, rouge-score, bert-score, tqdm
-  - [medrag-build]: rank-bm25
 
 ## Key vLLM version notes
 

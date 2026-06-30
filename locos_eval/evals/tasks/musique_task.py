@@ -4,8 +4,7 @@ MuSiQue (bdsaglam/musique) is a multi-hop open-book QA dataset where every
 question requires composing 2-4 facts from a pool of 20 distractor-rich
 paragraphs (Trivedi et al., 2022). Because the answer cannot be reached by
 single-span copying, MuSiQue is a strong test of *non-literal* retrieval
-(synthesis across passages), complementing summarisation tasks like
-ACI-Bench / XSum.
+(synthesis across passages).
 
 Prompt asks the model to reason step by step and place the final short
 answer inside an ``<answer>$ANSWER</answer>`` tag. Scoring is normalized
@@ -49,7 +48,7 @@ def _load_prompts() -> dict[str, str]:
 
 
 def _format_paragraphs(paragraphs: list[dict], prompts: dict[str, str]) -> str:
-    """Verbalize the 20 paragraphs in their dataset order (matches MedRAG style)."""
+    """Verbalize the 20 paragraphs in their dataset order."""
     passage_tpl = prompts.get("passage", "[{index}] {title}\n{content}")
     sep = prompts.get("passage_separator", "\n\n")
     lines = [

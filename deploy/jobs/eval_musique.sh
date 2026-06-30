@@ -2,6 +2,9 @@
 # Eval: MuSiQue multi-hop QA (subset answerable, split validation by default)
 set -euo pipefail
 
+# Shared helpers (ensure_heads, model registry). Run from the repo root.
+source deploy/job_config.sh
+
 DECODING="${DECODING:-ablation}"
 ABLATION_MODE="${ABLATION_MODE:-zero}"
 SUBSET="${SUBSET:-answerable}"

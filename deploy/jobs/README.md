@@ -49,10 +49,8 @@ python scripts/upload_results.py ./results_dir \
 
 | Script | Description |
 | --- | --- |
-| `eval_nq_swap.sh` | NQ-Swap context faithfulness eval (sub_EM, org_EM) |
-| `eval_xsum.sh` | XSum summarization eval (ROUGE-L, BERTScore, FactKB) |
-| `eval_medrag.sh` | MedRAG medical QA eval (5 sub-datasets, MCQ accuracy) |
-| `eval_aci_bench.sh` | ACI-Bench dialogue-to-note eval (ROUGE-L, BERTScore, LLM judge) |
+| `eval_babilong.sh` | BABILong long-context free-form QA eval |
+| `eval_musique.sh` | MuSiQue multi-hop open-book QA eval |
 | `detect_logit_contrib.sh` | LOCOS write-aware OV logit-contribution retrieval head detection |
 | `detect_contrastive.sh` | Contrastive attention scoring baseline |
 | `detect_cri.sh` | Causal Retrieval Importance via activation patching |

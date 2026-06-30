@@ -107,56 +107,6 @@ method_job_slug() {
     esac
 }
 
-# Resolve task names for a job script, given EXTRA_ENVS.
-# Returns newline-separated task names for use with check_experiment.py.
-# Non-eval scripts (detect_*, etc.) return nothing → no pre-check.
-task_names_for_script() {
-    local script="$1"
-    shift
-    local envs=("$@")
-
-    # Parse EXTRA_ENVS into local variables
-    local DECODING="ablation" TOP_K="5" LENGTH="short"
-    local DATASETS="mmlu_med medqa supergpqa_med"
-    for env_pair in "${envs[@]+"${envs[@]}"}"; do
-        case "$env_pair" in
-            DECODING=*)  DECODING="${env_pair#DECODING=}" ;;
-            TOP_K=*)     TOP_K="${env_pair#TOP_K=}" ;;
-            LENGTH=*)    LENGTH="${env_pair#LENGTH=}" ;;
-            DATASETS=*)  DATASETS="${env_pair#DATASETS=}" ;;
-        esac
-    done
-
-    local base
-    base=$(basename "$script" .sh)
-    case "$base" in
-        eval_nq_swap)
-            echo "nq_swap"
-            ;;
-        eval_xsum)
-            echo "xsum_faithfulness"
-            ;;
-        eval_aci_bench)
-            echo "aci_bench"
-            ;;
-        eval_longbench_v2)
-            if [[ "$LENGTH" == "all" ]]; then
-                echo "longbench_v2"
-            else
-                echo "longbench_v2_${LENGTH}"
-            fi
-            ;;
-        eval_medrag)
-            for ds in ${DATASETS}; do
-                echo "medrag_${ds}_top${TOP_K}"
-            done
-            ;;
-        *)
-            # Non-eval script (detection, etc.) — no pre-check
-            ;;
-    esac
-}
-
 # Generate the setup commands that run inside each pod
 setup_commands() {
     cat <<'SETUP'

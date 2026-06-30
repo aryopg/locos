@@ -7,7 +7,7 @@ components (model_slug, variant, key, local_dir).
 Can be used as a library or invoked as a CLI::
 
     python -m locos_eval.evals.experiment_key \
-        --task nq_swap --model meta-llama/Meta-Llama-3-8B-Instruct \
+        --task babilong --model meta-llama/Meta-Llama-3-8B-Instruct \
         --decoding ablation --heads retrieval_heads/Llama-3-8B_nolima.json \
         --variant
 """
@@ -27,7 +27,7 @@ class ExperimentKey:
     """
 
     task: str
-    """Task name, e.g. ``"nq_swap"``, ``"aci_bench"``."""
+    """Task name, e.g. ``"babilong"``, ``"musique"``."""
 
     model: str
     """Full HuggingFace model name, e.g. ``"meta-llama/Meta-Llama-3-8B-Instruct"``."""

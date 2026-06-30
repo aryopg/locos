@@ -1,12 +1,12 @@
 """Shared discovery, aggregation, and bar-plot helpers for per-model
-downstream-eval bar charts (babilong / musique / medrag).
+downstream-eval bar charts (babilong / musique).
 
 Each task family has its own driver script that supplies:
 - ``task_dirs``: which subdirectories under ``<results-root>/`` to scan
 - ``domain_fn``: maps a result row to its grouping label (the bar group)
 - ``metrics``: which score keys to plot (one panel per metric)
 
-The shared code mirrors ``longbench_v2_bar.py``: per-seed discovery via
+Per-seed discovery is via
 ``parse_variant_dir``/``family_to_canonical``/``load_results_jsonl``, then
 mean/std aggregation and bar plotting hued by decoding variant.
 """
@@ -22,18 +22,18 @@ import numpy as np
 import pandas as pd
 from rich.console import Console
 
+from locos.plotting._downstream_common import (
+    VARIANT_FAMILIES,
+    family_to_canonical,
+    load_results_jsonl,
+    parse_variant_dir,
+)
 from locos_eval.utils.plotting import (
     LINE_WIDTH,
     MODEL_PRETTY_NAMES,
     facecolor_alpha,
     save_figure,
     setup_plot_style,
-)
-from locos.plotting.longbench_v2_radar import (
-    VARIANT_FAMILIES,
-    family_to_canonical,
-    load_results_jsonl,
-    parse_variant_dir,
 )
 
 console = Console()
@@ -307,7 +307,7 @@ def _plot_bars(
     ax.set_axisbelow(True)
 
 
-# Fixed figure sizes so Overall.svg matches across babilong/musique/medrag and
+# Fixed figure sizes so Overall.svg matches across babilong/musique and
 # per-model figures match across models within a task.
 OVERALL_FIGSIZE = (10.0, 2.0)
 PER_MODEL_FIGSIZE = (8.0, 3.0)

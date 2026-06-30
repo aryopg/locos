@@ -3,7 +3,7 @@
 # bAbI-style supporting-fact reasoning over a short story. Answers are
 # typically a single noun (a name, place, or object). We ask the model to
 # reason step by step and place the final short answer inside <answer>…</answer>
-# tags, matching the convention used by MedRAG / LongBench-v2 in this repo.
+# tags.
 #
 # Variables (user): {story}, {question}
 

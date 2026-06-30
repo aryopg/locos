@@ -2,6 +2,9 @@
 # Ablation control: parametric/arithmetic eval with bottom-k heads (specificity control)
 set -euo pipefail
 
+# Shared helpers (ensure_heads, model registry). Run from the repo root.
+source deploy/job_config.sh
+
 ABLATION_MODE="${ABLATION_MODE:-mean}"
 VALUES="${VALUES:-1 5 10 20 50}"
 DATASET="${DATASET:-aryopg/parametric-arithmetic-eval}"
