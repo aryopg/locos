@@ -62,14 +62,3 @@ models:
     temperature: 1.0
     top_p: 0.95
     top_k: 64
-
-  # --- OpenAI GPT-OSS ---
-  # FIXME: gpt-oss models are new; no official generation_config.json found yet.
-  #        Using conservative defaults similar to Llama-3.
-  openai/gpt-oss-20b:
-    temperature: 0.6
-    top_p: 0.95
-
-  openai/gpt-oss-120b:
-    temperature: 0.6
-    top_p: 0.95

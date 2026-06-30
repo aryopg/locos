@@ -31,9 +31,8 @@ python -m pip install -e ".[dev,eval]" \
 ```
 
 Expected GPU counts are encoded in `deploy/job_config.sh`. Small 4B-14B models
-usually run with TP=1, 27B-32B models with TP=2, and `openai/gpt-oss-120b` with
-TP=4. Ablation runs require `--enforce-eager`, which is the default in the eval
-runner.
+usually run with TP=1 and 27B-32B models with TP=2. Ablation runs require
+`--enforce-eager`, which is the default in the eval runner.
 
 ## Artifact Layout
 

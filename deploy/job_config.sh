@@ -28,8 +28,6 @@ gpu_count_for_model() {
         Qwen/Qwen3-32B)                         echo 2 ;;
         allenai/Olmo-3.1-32B-Instruct)          echo 2 ;;
         allenai/Olmo-3-7B-Instruct)             echo 1 ;;
-        openai/gpt-oss-20b)                     echo 2 ;;
-        openai/gpt-oss-120b)                    echo 4 ;;
         *)                                      echo 2 ;;  # default
     esac
 }
@@ -46,8 +44,6 @@ DEFAULT_MODELS=(
     "Qwen/Qwen3-32B"
     "allenai/Olmo-3.1-32B-Instruct"
     "allenai/Olmo-3-7B-Instruct"
-    "openai/gpt-oss-20b"
-    "openai/gpt-oss-120b"
 )
 
 # ---------------------------------------------------------------------------

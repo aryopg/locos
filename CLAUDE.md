@@ -102,7 +102,7 @@ This repository contains two packages:
     - Hardcoded DEFAULTS < configs/_default.yaml < configs/{ModelName}.yaml < --model-config CLI < CLI args
     - _default.yaml: global defaults (temperature, top_p, top_k, max_tokens, tp, gpu_mem)
     - Per-model files: Qwen3-{4,8,14,32}B.yaml, gemma-3-{4,12,27}b-it.yaml,
-      gemma-4-31B-it.yaml, gpt-oss-{20,120}b.yaml, Meta-Llama-3-8B-Instruct.yaml
+      gemma-4-31B-it.yaml, Meta-Llama-3-8B-Instruct.yaml
     - null in model YAML resets to hardcoded disabled default (e.g. sampling_top_p: null → 1.0)
     - EvalRunner.resolve_args() maps CLI aliases (--tp, --gpu-mem) to config keys
   Run: python -m locos_eval.evals.tasks.<task> --model ... --heads ... --tp 4

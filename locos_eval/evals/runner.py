@@ -390,7 +390,7 @@ class EvalRunner:
         falls back to a plain ``Role: content`` format.
 
         For tokenizers whose chat template exposes an ``enable_thinking``
-        Jinja variable (Qwen3, gpt-oss, …) we explicitly pass
+        Jinja variable (Qwen3 and other reasoning models) we explicitly pass
         ``enable_thinking=True`` rather than relying on the template's
         default. Reasoning models behave very differently with thinking
         on vs off, and we want the eval pipeline to lock that knob to

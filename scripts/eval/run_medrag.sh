@@ -27,8 +27,6 @@ gpu_count_for_model() {
         Qwen/Qwen3-8B)                          echo 1 ;;
         Qwen/Qwen3-14B)                         echo 2 ;;
         Qwen/Qwen3-32B)                         echo 4 ;;
-        openai/gpt-oss-20b)                     echo 2 ;;
-        openai/gpt-oss-120b)                    echo 4 ;;
         *)                                      echo 2 ;;
     esac
 }
@@ -42,8 +40,6 @@ DEFAULT_MODELS=(
     "Qwen/Qwen3-8B"
     "Qwen/Qwen3-14B"
     "Qwen/Qwen3-32B"
-    "openai/gpt-oss-20b"
-    "openai/gpt-oss-120b"
 )
 
 # All MedRAG sub-datasets
