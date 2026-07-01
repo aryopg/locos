@@ -30,22 +30,77 @@ This repo includes:
 - deployment job scripts under `deploy/jobs`
 - a static project page under `web/`
 
-## Install
+## Quickstart
+
+For the public release path, use a GPU machine with CUDA 12.x and vLLM support:
 
 Use Python 3.11 or newer. GPU runs need a CUDA/vLLM-compatible environment; CPU-only machines are still useful for docs, plotting, notebook structure checks, and unit tests that do not touch model execution.
 
 ```bash
-# Create an environment.
-uv venv --python python3.11 --system-site-packages
+# Create the release environment.
+make venv-gpu
+source .venv/bin/activate
 
-# Development + eval dependencies.
-uv pip install -e ".[dev,eval]" \
-    --extra-index-url https://download.pytorch.org/whl/cu128 \
-    --index-strategy unsafe-best-match \
-    --python .venv/bin/python
+# Check that the public API and CPU-safe pieces import.
+python -m pytest tests/test_standalone_surface.py tests/test_eval_runner.py -q
 ```
 
-For local Mac development without vLLM/GPU work, install only what your environment supports and run the CPU-safe tests with `python3.11 -m pytest ...`.
+Download a released heads file and inspect the selected heads:
+
+```bash
+python scripts/download_heads.py \
+    --repo-id aryopg/locos-results \
+    --heads retrieval_heads/Qwen3-8B_logit_contrib_nolima.json
+
+python - <<'PY'
+from locos_eval import load_retrieval_heads
+
+heads = load_retrieval_heads("retrieval_heads/Qwen3-8B_logit_contrib_nolima.json", num_heads=10)
+print(heads)
+PY
+```
+
+Then run either a small downstream smoke test:
+
+```bash
+python -m locos_eval.evals.tasks.babilong_task \
+    --model Qwen/Qwen3-8B \
+    --heads retrieval_heads/Qwen3-8B_logit_contrib_nolima.json \
+    --decoding ablation \
+    --ablation-mode mean \
+    --num-heads 50 \
+    --subset qa2 \
+    --split 0k \
+    --limit 2 \
+    --tp 1
+```
+
+or a small LOCOS detection run:
+
+```bash
+python locos/download_haystack_data.py --dataset nolima
+python -m locos.detectors.logit_contrib \
+    --model Qwen/Qwen3-8B \
+    --dataset nolima \
+    --num-examples 2 \
+    --max-length 4000
+```
+
+Full reproduction commands, artifact downloads, and figure regeneration are in [REPRODUCING.md](REPRODUCING.md).
+
+## Install Notes
+
+The Makefile has two environment targets:
+
+```bash
+# GPU host, full release/eval stack including vLLM.
+make venv-gpu
+
+# CPU-only local development, useful for docs and import/unit tests.
+make venv HOST_PYTHON=python3.11
+```
+
+For local Mac development without vLLM/GPU work, install only what your environment supports and run CPU-safe tests with `make test ARGS="tests/test_standalone_surface.py"`.
 
 This repository intentionally does not commit `uv.lock`: the CUDA, PyTorch, and
 vLLM wheel set is platform-specific. The release install recipe is documented in
@@ -56,7 +111,7 @@ vLLM wheel set is platform-specific. The release install recipe is documented in
 The Makefile is the shortest public interface:
 
 ```bash
-make install-dev
+make venv-gpu
 make data DATASET=nolima
 make detect MODEL=Qwen/Qwen3-8B DATASET=nolima
 make ablate MODEL=Qwen/Qwen3-8B HEADS=retrieval_heads/Qwen3-8B_logit_contrib_nolima.json
@@ -68,7 +123,7 @@ make notebook
 Override the interpreter if needed:
 
 ```bash
-make test PYTHON=.venv/bin/python
+make test PYTHON=/path/to/python
 ```
 
 ## Detection
@@ -201,6 +256,13 @@ python locos/analysis/parametric_ablation.py \
     --ablation-mode mean \
     --include-baseline
 ```
+
+These controls use the public HuggingFace dataset
+`aryopg/parametric-arithmetic-eval`, built by
+`scripts/eval/build_parametric_and_arithmetic_dataset.py` from City-Country,
+PopQA, and arithmetic samples. `locos/analysis/parametric_ablation.py` uses this
+dataset by default; rebuild it only if you want to audit or modify the control
+set.
 
 Plotting scripts save figures under `figures/` and usually write legends as sibling files. Downstream plotting defaults to:
 

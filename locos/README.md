@@ -90,4 +90,5 @@ heads = load_retrieval_heads(
 Public heads, ablation outputs, downstream outputs, and manifests live in the
 HuggingFace dataset repo `aryopg/locos-results`. See the root
 `REPRODUCING.md` and `experiments/manifest.yaml` for the release artifact
-layout and figure regeneration commands.
+layout and figure regeneration commands. The parametric/arithmetic specificity
+control uses the separate public dataset `aryopg/parametric-arithmetic-eval`.

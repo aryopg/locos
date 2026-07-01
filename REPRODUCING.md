@@ -184,6 +184,13 @@ python locos/analysis/parametric_ablation.py \
     --seed 42
 ```
 
+The control dataset is published separately as
+`aryopg/parametric-arithmetic-eval`. It combines City-Country, PopQA, and
+arithmetic samples so the ablation can test whether retrieval-head masking is
+specific to contextual retrieval rather than broadly damaging parametric recall
+or simple arithmetic. `parametric_ablation.py` uses this dataset by default;
+the builder script is included for auditability and regeneration.
+
 ## Downstream Evals
 
 All downstream task runners share these core flags:
@@ -243,7 +250,7 @@ Run these CPU-safe checks before advertising the repository:
 ruff check locos locos_eval scripts tests
 python3.11 -m compileall locos locos_eval scripts examples
 python -m json.tool notebooks/locos_demo.ipynb >/dev/null
-python3.11 -m pytest tests/test_standalone_surface.py tests/test_retrieval_heads.py tests/test_eval_tasks.py tests/test_logit_contrib.py tests/test_dla.py
+python3.11 -m pytest tests/test_standalone_surface.py tests/test_retrieval_heads.py tests/test_eval_runner.py tests/test_logit_contrib.py tests/test_dla.py
 python -m locos.detectors.logit_contrib --help
 python -m locos.detectors.attention_spatial --help
 python -m locos.detectors.dla --help
