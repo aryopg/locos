@@ -1,6 +1,6 @@
 # LOCOS
 
-**Logit-Contribution Spatial Scoring for retrieval heads.**
+**Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads**
 
 LOCOS is a toolkit for finding attention heads that matter for contextual retrieval, then testing those heads with mean or zero ablation during vLLM inference. The project page is the best visual overview; this README is the practical guide for running and extending the code.
 
