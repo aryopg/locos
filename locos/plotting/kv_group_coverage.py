@@ -30,9 +30,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from locos_eval.utils.plotting import LINE_WIDTH, MODEL_PRETTY_NAMES, save_figure, setup_plot_style
 
-# FIXME(aryo): method colour scheme is hand-picked here; we should decide
-# whether to move it into locos_eval/utils/plotting.py so every figure
-# consistently maps "wu" / "logit_contrib" / "cri" to the same colours.
 METHOD_COLOURS = {
     "wu": "#4C72B0",
     "behavioral": "#4C72B0",

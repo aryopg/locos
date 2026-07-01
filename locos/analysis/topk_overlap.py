@@ -12,8 +12,8 @@ Outputs:
     analysis/outputs/e2/e2_jaccard_data.csv
 
 Usage:
-    python locos/analysis/e2_topk_overlap.py
-    python locos/analysis/e2_topk_overlap.py --no-download
+    python locos/analysis/topk_overlap.py
+    python locos/analysis/topk_overlap.py --no-download
 """
 
 from __future__ import annotations
@@ -32,7 +32,6 @@ import numpy as np
 from rich.console import Console
 from rich.table import Table
 
-from locos_eval.utils.plotting import LINE_WIDTH, save_figure, setup_plot_style
 from locos.analysis._utils import (
     ALL_MODELS,
     JACCARD_K_VALUES,
@@ -42,6 +41,7 @@ from locos.analysis._utils import (
     load_score_file,
     top_k_heads,
 )
+from locos_eval.utils.plotting import LINE_WIDTH, save_figure, setup_plot_style
 
 console = Console()
 

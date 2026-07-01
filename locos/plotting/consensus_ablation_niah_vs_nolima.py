@@ -57,10 +57,8 @@ def discover_cells(results_dir: Path) -> list[dict]:
             continue
         with open(p) as f:
             payload = json.load(f)
-        # payload: {run_key: metrics}. Pick the single non-baseline topk entry.
-        # FIXME(aryo): if a future run writes multiple topk entries into the
-        # same cache file we silently average them. For now each consensus
-        # cache file corresponds to exactly one set size.
+        # payload: {run_key: metrics}. Each consensus cache file should contain
+        # one non-baseline top-k entry for the set size encoded in its filename.
         rouge_ls = []
         baseline_rl = None
         for run_key, metrics in payload.items():
@@ -72,13 +70,15 @@ def discover_cells(results_dir: Path) -> list[dict]:
                 rouge_ls.append(float(metrics["rouge_l_mean"]))
         if not rouge_ls:
             continue
+        if len(rouge_ls) != 1:
+            raise ValueError(f"Expected one non-baseline top-k entry in {p}, found {len(rouge_ls)}")
         cells.append(
             {
                 "dataset": m.group("dataset"),
                 "model": m.group("model"),
                 "set_kind": m.group("set_kind"),
                 "k_per_method": int(m.group("k")),
-                "rouge_l_mean": sum(rouge_ls) / len(rouge_ls),
+                "rouge_l_mean": rouge_ls[0],
                 "baseline_rouge_l": baseline_rl,
             }
         )

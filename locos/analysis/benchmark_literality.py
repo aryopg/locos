@@ -24,8 +24,8 @@ Outputs:
     analysis/outputs/e5/e5_cue_scatter_legend.svg
 
 Usage:
-    python locos/analysis/e5_benchmark_literality.py
-    python locos/analysis/e5_benchmark_literality.py --no-download
+    python locos/analysis/benchmark_literality.py
+    python locos/analysis/benchmark_literality.py --no-download
 """
 
 from __future__ import annotations
@@ -44,7 +44,6 @@ from rich.console import Console
 from rich.table import Table
 from scipy.stats import spearmanr
 
-from locos_eval.utils.plotting import save_figure, setup_plot_style
 from locos.analysis._utils import (
     ALL_MODELS,
     MODEL_LABELS,
@@ -52,6 +51,7 @@ from locos.analysis._utils import (
     load_downstream_from_hf,
     load_eval_rows,
 )
+from locos_eval.utils.plotting import save_figure, setup_plot_style
 
 console = Console()
 

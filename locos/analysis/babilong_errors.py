@@ -24,8 +24,8 @@ Outputs:
     analysis/outputs/e6/e6_ztest.csv
 
 Usage:
-    python locos/analysis/e6_babilong_errors.py
-    python locos/analysis/e6_babilong_errors.py --no-download
+    python locos/analysis/babilong_errors.py
+    python locos/analysis/babilong_errors.py --no-download
 """
 
 from __future__ import annotations
@@ -45,7 +45,6 @@ from rich.console import Console
 from rich.table import Table
 from scipy.stats import norm as scipy_norm
 
-from locos_eval.utils.plotting import save_figure, setup_plot_style
 from locos.analysis._utils import (
     E6_AFFECTED_MODELS,
     MODEL_LABELS,
@@ -53,6 +52,7 @@ from locos.analysis._utils import (
     load_downstream_from_hf,
     load_eval_rows,
 )
+from locos_eval.utils.plotting import save_figure, setup_plot_style
 
 console = Console()
 

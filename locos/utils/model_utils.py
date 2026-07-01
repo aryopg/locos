@@ -131,7 +131,7 @@ def format_prompt_with_chat_template(
 ) -> str | None:
     """Apply the tokenizer's chat template, optionally disabling thinking mode.
 
-    Some models (GPT-oss, Qwen3, …) require chat-formatted prompts to produce
+    Some models (for example Qwen3) require chat-formatted prompts to produce
     sensible output.  This wraps *prompt_text* in a single-turn user message
     and adds the generation prompt.  For reasoning models whose chat template
     supports ``enable_thinking``, thinking is disabled by default so the model
@@ -155,7 +155,7 @@ def format_prompt_with_chat_template(
 def detect_thinking_tokens(tokenizer) -> tuple[int | None, int | None]:
     """Detect thinking start/end token IDs for reasoning models.
 
-    Reasoning models (Qwen3, GPT-oss, etc.) wrap chain-of-thought output
+    Reasoning models (for example Qwen3) wrap chain-of-thought output
     in special marker tokens (e.g. ``<think>…</think>``).  This function
     checks the tokenizer vocabulary for known marker patterns.
 

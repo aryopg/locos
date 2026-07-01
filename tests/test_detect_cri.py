@@ -1,4 +1,4 @@
-"""Unit tests for locos/detect_cri.py.
+"""Unit tests for locos.detectors.cri.
 
 No GPU required -- all model interactions are mocked.
 """

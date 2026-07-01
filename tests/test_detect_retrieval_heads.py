@@ -1,4 +1,4 @@
-"""Unit tests for locos/detect_retrieval_heads.py.
+"""Unit tests for locos.detectors.behavioral.
 
 No GPU required -- all model interactions are mocked.
 """

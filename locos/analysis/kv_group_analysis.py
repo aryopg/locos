@@ -116,7 +116,7 @@ def aggregate_scores_by_kv_group(
 
     out: dict[str, list[float]] = {}
     for (layer, g), member_vals in groups.items():
-        # FIXME(aryo): averaging per-trial across Q-heads in a KV group is the
+        # NOTE: averaging per-trial across Q-heads in a KV group is the
         # simplest aggregation, but an alternative is max-over-heads (interpret
         # a group as "retrieval-relevant if any member head is"). The reviewer
         # may prefer max. Chose mean because it matches how per-head means are
@@ -158,7 +158,7 @@ def compute_kv_group_stats(
     num_heads_total = len(ranked)
 
     # Total unique (layer, kv_group) cells possible across the model.
-    # FIXME(aryo): we treat each (layer, kv_group) as a separate cell. That
+    # NOTE: we treat each (layer, kv_group) as a separate cell. That
     # matches how heads are ranked (per-layer). If the reviewer wants a global
     # "how many distinct KV groups across all layers" number, that's a second
     # column we could add.

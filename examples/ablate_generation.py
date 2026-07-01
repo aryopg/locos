@@ -20,7 +20,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", required=True, help="HuggingFace model id or local model path.")
     parser.add_argument("--heads", required=True, help="Retrieval-head JSON path.")
     parser.add_argument("--num-heads", type=int, default=50, help="Number of top heads to ablate.")
-    parser.add_argument("--prompt", default="Answer using the context: Paris is the capital of France.\nQuestion: What is the capital of France?\nAnswer:")
+    parser.add_argument(
+        "--prompt",
+        default="Answer using the context: Paris is the capital of France.\nQuestion: What is the capital of France?\nAnswer:",
+    )
     parser.add_argument("--max-tokens", type=int, default=32)
     return parser.parse_args()
 
@@ -49,4 +52,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

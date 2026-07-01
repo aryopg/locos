@@ -18,22 +18,22 @@ Usage:
     python locos/download_haystack_data.py --dataset nolima
 
     # Quick test with NIAH (default)
-    python locos/detect_retrieval_heads.py \\
+    python -m locos.detectors.behavioral \\
         --model Qwen/Qwen3.5-2B --max-length 2000 --num-lengths 3
 
     # Detection with NoLiMa (minimal lexical overlap probing)
-    python locos/detect_retrieval_heads.py \\
+    python -m locos.detectors.behavioral \\
         --model Qwen/Qwen3.5-2B --dataset nolima --max-length 8000
 
     # Full detection (matches original defaults)
-    python locos/detect_retrieval_heads.py \\
+    python -m locos.detectors.behavioral \\
         --model Qwen/Qwen3.5-2B --min-length 1000 --max-length 50000
 
     # Resume from checkpoint
-    python locos/detect_retrieval_heads.py \\
+    python -m locos.detectors.behavioral \\
         --model Qwen/Qwen3.5-2B --resume
 
-Requires: GPU, transformers, rouge-score (pip install -e ".[eval]")
+Requires: GPU and the project runtime dependencies.
 """
 
 import argparse
@@ -409,7 +409,7 @@ def main():
         default=False,
         help=(
             "Wrap the prompt in the tokenizer's chat template before detection. "
-            "Required for models that need structured prompts (e.g. GPT-oss). "
+            "Required for models that need structured prompts. "
             "Needle positions are re-located after re-tokenization."
         ),
     )
@@ -419,8 +419,7 @@ def main():
         default=None,
         help=(
             "String to append after the prompt (post chat-template if enabled). "
-            "Tokenized and appended to the token sequence before detection. "
-            "E.g. '<|channel|>final<|message|>' for GPT-oss to skip reasoning."
+            "Tokenized and appended to the token sequence before detection."
         ),
     )
     args = parser.parse_args()
@@ -699,8 +698,8 @@ def main():
                         question_token_cache[trial.question] = question_tokens
                     full_tokens = context_tokens + question_tokens
 
-                # Optionally wrap in chat template (required for models like
-                # GPT-oss that need structured prompts to produce sensible output).
+                # Optionally wrap in chat template for models that need
+                # structured prompts to produce sensible output.
                 chat_template_applied = False
                 if args.chat_template:
                     prompt_text = tokenizer.decode(full_tokens, skip_special_tokens=True)
@@ -726,8 +725,8 @@ def main():
                     needle_start += 1
                     needle_end += 1
 
-                # Append prompt suffix (e.g. '<|channel|>final<|message|>'
-                # for GPT-oss to skip reasoning and go straight to final answer).
+                # Append prompt suffix when the caller needs model-specific
+                # generation-control tokens.
                 if prompt_suffix_ids:
                     full_tokens = full_tokens + prompt_suffix_ids
 

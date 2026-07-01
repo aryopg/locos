@@ -17,8 +17,8 @@ Decision rule printed to console:
     0.4–0.7                   → E7 decides
 
 Usage:
-    python locos/analysis/e1_alpha_spatial.py
-    python locos/analysis/e1_alpha_spatial.py --no-download
+    python locos/analysis/alpha_spatial.py
+    python locos/analysis/alpha_spatial.py --no-download
 """
 
 from __future__ import annotations
@@ -37,7 +37,6 @@ import numpy as np
 from rich.console import Console
 from rich.table import Table
 
-from locos_eval.utils.plotting import save_figure, setup_plot_style
 from locos.analysis._utils import (
     ALL_MODELS,
     MODEL_LABELS,
@@ -48,6 +47,7 @@ from locos.analysis._utils import (
     rbo,
     top_k_heads,
 )
+from locos_eval.utils.plotting import save_figure, setup_plot_style
 
 console = Console()
 

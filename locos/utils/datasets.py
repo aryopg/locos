@@ -3,8 +3,8 @@
 Provides a unified RetrievalTrial dataclass and dataset builders for both
 NIAH (Wu et al. 2024) and NoLiMa (Adobe Research, ICML 2025) probing datasets.
 
-Both the Wu et al. behavioral scorer (detect_retrieval_heads.py) and the
-CRI causal scorer (detect_cri.py) consume the same RetrievalTrial format.
+Both the Wu et al. behavioral scorer (`locos.detectors.behavioral`) and the
+CRI causal scorer (`locos.detectors.cri`) consume the same RetrievalTrial format.
 """
 
 from __future__ import annotations

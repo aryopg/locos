@@ -16,8 +16,8 @@ Decision rules printed to console (per headline model):
     D strictly above B (non-overlap, D > B)  → adverse result, flag
 
 Usage:
-    python locos/analysis/e7_factorial.py
-    python locos/analysis/e7_factorial.py --no-download
+    python locos/analysis/factorial.py
+    python locos/analysis/factorial.py --no-download
 """
 
 from __future__ import annotations
@@ -39,7 +39,6 @@ import numpy as np
 from rich.console import Console
 from rich.table import Table
 
-from locos_eval.utils.plotting import save_figure, setup_plot_style
 from locos.analysis._utils import (
     ABLATION_K_VALUES,
     ALL_MODELS,
@@ -48,6 +47,7 @@ from locos.analysis._utils import (
     bootstrap_ci,
     get_output_dir,
 )
+from locos_eval.utils.plotting import save_figure, setup_plot_style
 
 console = Console()
 

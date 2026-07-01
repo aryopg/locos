@@ -66,7 +66,7 @@ def top_k_keys(scores: dict[str, list[float]], k: int) -> set[str]:
 def write_head_set(keys: set[str], out_path: Path, meta: dict) -> None:
     """Write a flat head JSON consumable by nolima_ablation.py."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # FIXME(aryo): we emit constant score 1.0 because nolima_ablation.py only
+    # NOTE: we emit constant score 1.0 because nolima_ablation.py only
     # uses the keys and a top-k cut. If a downstream consumer starts reading
     # the score values, we should switch to writing the *actual* mean score
     # from one of the methods (e.g. method A) so the ordering is preserved.

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Compare two retrieval head JSON files.
 
-Compares the output of detect_retrieval_heads.py against a reference JSON
-(e.g., the original from nightdessert/Retrieval_Head) to validate consistency.
+Compares generated retrieval-head JSON against a reference JSON (e.g., the
+original from nightdessert/Retrieval_Head) to validate consistency.
 
 Usage:
-    python locos/compare_retrieval_heads.py \\
+    python -m locos.analysis.compare_heads \\
         --reference retrieval_heads/Meta-Llama-3-8B-Instruct.json \\
         --generated retrieval_heads/Meta-Llama-3-8B-Instruct_new.json
 
     # With custom top-K for ranking comparison
-    python locos/compare_retrieval_heads.py \\
+    python -m locos.analysis.compare_heads \\
         --reference retrieval_heads/Meta-Llama-3-8B-Instruct.json \\
         --generated retrieval_heads/Meta-Llama-3-8B-Instruct_new.json \\
         --top-k 50

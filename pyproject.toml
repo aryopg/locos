@@ -13,13 +13,17 @@ dependencies = [
     # Install with: --extra-index-url https://download.pytorch.org/whl/cu128
     "vllm>=0.18,<0.19",
     "torch>=2.6,<2.11",
+    "matplotlib",
     "numpy",
+    "pandas",
+    "rouge-score",
     "transformers",
     "accelerate",
     "huggingface-hub",
     "hf_transfer",
     "pyyaml",
     "rich",
+    "scipy",
     "seaborn",
     "python-dotenv",
 ]
@@ -36,7 +40,7 @@ dev = [
     "isort",
     "vulture",
 ]
-eval = ["datasets>=3.0", "rouge-score", "bert-score", "tqdm"]
+eval = ["anthropic", "datasets>=3.0", "bert-score", "tqdm"]
 
 [tool.setuptools.packages.find]
 where = ["."]

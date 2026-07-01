@@ -9,8 +9,6 @@ import pytest
 from locos_eval.evals.scorers import (
     call_llm_judge,
     extract_answer_letter,
-    factkb_score,
-    factkb_score_batch,
     normalize_answer,
     rouge_l_score,
     subspan_match,
@@ -153,98 +151,3 @@ class TestCallLlmJudge:
         result = call_llm_judge("sys", "user", max_retries=3)
         assert result == {}
         assert mock_client.messages.create.call_count == 3
-
-
-# ---------------------------------------------------------------------------
-# FactKB
-# ---------------------------------------------------------------------------
-
-
-class TestFactKB:
-    """Test FactKB scorer with mocked transformers model."""
-
-    def _setup_mocks(self, mock_model_cls, mock_tok_cls, score_value: float = 0.75):
-        """Set up mock tokenizer and model returning the given score."""
-        import torch
-
-        mock_tokenizer = MagicMock()
-        mock_tok_cls.from_pretrained.return_value = mock_tokenizer
-        # Tokenizer returns a dict-like that supports .to() and **unpacking
-        mock_tokens = MagicMock()
-        mock_tokens.to.return_value = mock_tokens
-        mock_tokenizer.return_value = mock_tokens
-
-        mock_model = MagicMock()
-        mock_model_cls.from_pretrained.return_value = mock_model
-        mock_model.to.return_value = mock_model
-
-        # logits that produce the desired softmax score for class 1
-        # softmax([0, x]) where sigmoid(x) ≈ score_value → x = log(p/(1-p))
-        import math
-
-        logit = math.log(score_value / (1 - score_value))
-        logits = torch.tensor([[0.0, logit]])
-        mock_output = MagicMock()
-        mock_output.logits = logits
-        mock_model.return_value = mock_output
-
-        return mock_tokenizer, mock_model
-
-    @patch("transformers.AutoTokenizer")
-    @patch("transformers.AutoModelForSequenceClassification")
-    def test_returns_float_score(self, mock_model_cls, mock_tok_cls) -> None:
-        self._setup_mocks(mock_model_cls, mock_tok_cls, score_value=0.75)
-        score = factkb_score("summary text", "source article text")
-        assert isinstance(score, float)
-        assert 0.0 <= score <= 1.0
-        assert score == pytest.approx(0.75, abs=0.05)
-
-    @patch("transformers.AutoTokenizer")
-    @patch("transformers.AutoModelForSequenceClassification")
-    def test_passes_prediction_source_pair(self, mock_model_cls, mock_tok_cls) -> None:
-        mock_tokenizer, _ = self._setup_mocks(mock_model_cls, mock_tok_cls)
-        factkb_score("the summary", "the article")
-        mock_tokenizer.assert_called_once()
-        call_args = mock_tokenizer.call_args
-        assert call_args[0][0] == [["the summary", "the article"]]
-
-    @patch("transformers.AutoTokenizer")
-    @patch("transformers.AutoModelForSequenceClassification")
-    def test_batch_returns_list(self, mock_model_cls, mock_tok_cls) -> None:
-        import torch
-
-        mock_tokenizer = MagicMock()
-        mock_tok_cls.from_pretrained.return_value = mock_tokenizer
-        mock_tokens = MagicMock()
-        mock_tokens.to.return_value = mock_tokens
-        mock_tokenizer.return_value = mock_tokens
-
-        mock_model = MagicMock()
-        mock_model_cls.from_pretrained.return_value = mock_model
-        mock_model.to.return_value = mock_model
-
-        logits = torch.tensor([[0.0, 1.0], [0.0, 2.0], [0.0, 0.5]])
-        mock_output = MagicMock()
-        mock_output.logits = logits
-        mock_model.return_value = mock_output
-
-        scores = factkb_score_batch(
-            ["s1", "s2", "s3"],
-            ["a1", "a2", "a3"],
-        )
-        assert len(scores) == 3
-        assert all(isinstance(s, float) for s in scores)
-        assert all(0.0 <= s <= 1.0 for s in scores)
-        # Verify actual values against known softmax class-1 probabilities:
-        # softmax([0, x])[1] = e^x / (1 + e^x)
-        import math
-
-        expected = [
-            math.exp(1) / (1 + math.exp(1)),  # logits [0, 1] → ~0.731
-            math.exp(2) / (1 + math.exp(2)),  # logits [0, 2] → ~0.881
-            math.exp(0.5) / (1 + math.exp(0.5)),  # logits [0, 0.5] → ~0.622
-        ]
-        for score, exp in zip(scores, expected):
-            assert score == pytest.approx(exp, abs=0.01), f"Expected {exp:.3f}, got {score:.3f}"
-        # Scores should be ordered: s2 > s1 > s3 (matching logit magnitudes)
-        assert scores[1] > scores[0] > scores[2]

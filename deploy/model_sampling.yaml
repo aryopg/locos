@@ -3,8 +3,7 @@
 # These are the model author's suggested defaults for open-ended generation.
 # Deterministic greedy (temperature=0) is NOT used — all runs are stochastic (Option C).
 #
-# FIXME: Verify these values against each model's generation_config.json on HuggingFace.
-#        The values below are best-effort from model cards as of 2026-04-09.
+# Values below are best-effort from model cards and generation configs as of 2026-04-09.
 #
 # Seeds are specified separately in the experiment matrix (default: [1, 2, 3]).
 
@@ -22,8 +21,8 @@ models:
 
   # --- Qwen3 series ---
   # Ref: Qwen/Qwen3-* model cards suggest temperature=0.7, top_p=0.8, top_k=20
-  # FIXME: Qwen3 models support "thinking mode" with different sampling;
-  #        using non-thinking defaults here.
+  # Qwen3 models support "thinking mode" with different sampling; these are
+  # non-thinking defaults.
   Qwen/Qwen3-4B:
     temperature: 0.7
     top_p: 0.8
@@ -46,8 +45,8 @@ models:
 
   # --- Google Gemma 3 ---
   # Ref: google/gemma-3-*-it generation_config.json
-  # FIXME: Gemma 3 model cards suggest temperature=1.0 with top_k=64, top_p=0.95.
-  #        These are higher temperature than others — verify this is intentional.
+  # Gemma 3 model cards suggest higher-temperature defaults than the other
+  # released models: temperature=1.0 with top_k=64, top_p=0.95.
   google/gemma-3-4b-it:
     temperature: 1.0
     top_p: 0.95

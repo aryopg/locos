@@ -14,8 +14,8 @@ Outputs:
     analysis/outputs/e3/e3_provenance.csv
 
 Usage:
-    python locos/analysis/e3_provenance.py
-    python locos/analysis/e3_provenance.py --no-download
+    python locos/analysis/provenance.py
+    python locos/analysis/provenance.py --no-download
 """
 
 from __future__ import annotations
@@ -31,7 +31,6 @@ if str(_REPO_ROOT) not in sys.path:
 
 from rich.console import Console
 
-from locos_eval.utils.plotting import save_figure, setup_plot_style
 from locos.analysis._utils import (
     ALL_MODELS,
     MODEL_LABELS,
@@ -40,6 +39,7 @@ from locos.analysis._utils import (
     mean_scores,
     top_k_heads,
 )
+from locos_eval.utils.plotting import save_figure, setup_plot_style
 
 console = Console()
 

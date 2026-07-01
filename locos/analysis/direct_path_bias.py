@@ -134,7 +134,7 @@ def identify_disagreement(rows: list[dict]) -> list[dict]:
     cri_top_cutoff = max(1, int(0.10 * n))  # cri_rank < cri_top_cutoff  → top 10%
     lc_bottom_cutoff = n - max(1, int(0.50 * n))  # lc_rank >= lc_bottom_cutoff → bottom 50%
     disagreement = [r for r in rows if r["cri_rank"] < cri_top_cutoff and r["lc_rank"] >= lc_bottom_cutoff]
-    # FIXME(aryo): the "top-10% vs bottom-50%" thresholds are arbitrary. An
+    # NOTE: the "top-10% vs bottom-50%" thresholds are a display choice. An
     # alternative is absolute-rank-difference > X (e.g. > num_heads/4). The
     # chosen percentile thresholds emphasise the clearest disagreements and
     # keep the table readable; a reviewer may prefer a different cut.

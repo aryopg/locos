@@ -380,7 +380,7 @@ def main():
         default=False,
         help=(
             "Wrap the prompt in the tokenizer's chat template before detection. "
-            "Required for models that need structured prompts (e.g. GPT-oss). "
+            "Required for models that need structured prompts. "
             "Needle positions are re-located after re-tokenization."
         ),
     )

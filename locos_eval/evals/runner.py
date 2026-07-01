@@ -571,7 +571,7 @@ class EvalRunner:
                     # Native vLLM pipeline (greedy / ablation): hand the whole
                     # remaining list to vLLM in a single call so its scheduler
                     # can continuously batch as many prompts as memory allows.
-                    # FIXME: per-sample checkpointing is not possible during
+                    # NOTE: per-sample checkpointing is not possible during
                     # this call — if the job dies mid-generate, we lose all
                     # progress on `remaining` and resume from start_idx on
                     # restart. Acceptable trade for ablation/greedy throughput

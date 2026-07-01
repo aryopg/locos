@@ -18,25 +18,25 @@ locos_eval's load_retrieval_heads().
 
 Usage:
     # Quick test with NoLiMa
-    python locos/detect_contrastive.py \\
+    python -m locos.detectors.contrastive \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --dataset nolima --max-length 4000 --num-lengths 3
 
     # Full detection with NIAH
-    python locos/detect_contrastive.py \\
+    python -m locos.detectors.contrastive \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --min-length 1000 --max-length 50000
 
     # Use mass variant instead of top-k
-    python locos/detect_contrastive.py \\
+    python -m locos.detectors.contrastive \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --dataset nolima --top-k 0
 
     # Resume from checkpoint
-    python locos/detect_contrastive.py \\
+    python -m locos.detectors.contrastive \\
         --model meta-llama/Meta-Llama-3-8B-Instruct --resume
 
-Requires: GPU, transformers, rouge-score (pip install -e ".[eval]")
+Requires: GPU and the project runtime dependencies.
 """
 
 import argparse
@@ -912,7 +912,7 @@ def main():
                 )
                 full_tokens = input_ids[0].tolist()
 
-                # NOTE: Unlike detect_retrieval_heads.py, we do NOT narrow
+                # NOTE: Unlike the behavioral detector, we do NOT narrow
                 # the needle span to answer tokens for NIAH. The contrastive
                 # method measures attention mass over the full needle span
                 # and does not require token-identity matching, so the full

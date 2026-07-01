@@ -17,8 +17,8 @@ Decision rule printed to console:
     High TM or entropy-separated → framing must change.
 
 Usage:
-    python locos/analysis/e4_nonliterality.py
-    python locos/analysis/e4_nonliterality.py --no-download
+    python locos/analysis/nonliterality.py
+    python locos/analysis/nonliterality.py --no-download
 """
 
 from __future__ import annotations
@@ -36,7 +36,6 @@ import numpy as np
 from rich.console import Console
 from rich.table import Table
 
-from locos_eval.utils.plotting import save_figure, setup_plot_style
 from locos.analysis._utils import (
     MODEL_LABELS,
     get_output_dir,
@@ -44,6 +43,7 @@ from locos.analysis._utils import (
     mean_scores,
     top_k_heads,
 )
+from locos_eval.utils.plotting import save_figure, setup_plot_style
 
 console = Console()
 

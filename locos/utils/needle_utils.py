@@ -314,8 +314,8 @@ def build_tracked_prompt(
         add_bos: Prepend ``tokenizer.bos_token_id``. Only applies when
             ``use_chat_template=False`` (chat templates typically include
             BOS themselves).
-        prompt_suffix_ids: Tokens appended after the chat template (e.g. the
-            GPT-oss ``<|channel|>final<|message|>`` suffix).
+        prompt_suffix_ids: Tokens appended after the chat template for
+            model-specific generation control.
         context_buffer: Tokens reserved beyond the needle for question+answer
             in :func:`insert_needle_tokens`.
 
@@ -338,7 +338,7 @@ def build_tracked_prompt(
     # 2. Compose the "content" region: template-wrapped context, or
     # context + question.
     if prompt_template is not None and "{haystack}" in prompt_template:
-        # FIXME(aryo): template_prefix/suffix are tokenized independently of
+        # NOTE: template_prefix/suffix are tokenized independently of
         # the haystack, so BPE may tokenize the concat differently than
         # encoding the whole string as one. This is a minor fidelity loss
         # confined to two token boundaries at the {haystack} split — far
@@ -379,7 +379,7 @@ def build_tracked_prompt(
         wrapped_tokens = [tokenizer.bos_token_id, *wrapped_tokens]
         bos_offset = 1
 
-    # 5. Append prompt suffix (e.g. GPT-oss channel hint).
+    # 5. Append prompt suffix for model-specific generation control.
     if prompt_suffix_ids:
         wrapped_tokens = wrapped_tokens + list(prompt_suffix_ids)
 

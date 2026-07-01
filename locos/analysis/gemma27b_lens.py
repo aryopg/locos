@@ -16,7 +16,7 @@ Output:
     analysis/outputs/e7/e7_gemma27b_lens_legend.svg
 
 Usage:
-    python locos/analysis/e7_gemma27b_lens.py
+    python locos/analysis/gemma27b_lens.py
 """
 
 from __future__ import annotations
@@ -34,8 +34,8 @@ if str(_REPO_ROOT) not in sys.path:
 import matplotlib.pyplot as plt
 from rich.console import Console
 
-from locos_eval.utils.plotting import save_figure, setup_plot_style
 from locos.analysis._utils import ABLATION_K_VALUES, bootstrap_ci, get_output_dir
+from locos_eval.utils.plotting import save_figure, setup_plot_style
 
 console = Console()
 

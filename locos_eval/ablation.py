@@ -118,12 +118,9 @@ def build_ablation_attention_forward(
     replacement_value: float | torch.Tensor = 0.0 if replacement is None else replacement
 
     def ablation_forward(positions, hidden_states, **kwargs):
-        # FIXME: Gemma3's original forward branches on kwargs.get("has_images", False)
-        # to take the bidirectional naive_attn_with_masks path for VLM inputs
-        # (vllm/model_executor/models/gemma3.py:207-229). We don't replicate
-        # that branch here; ablation in this codebase is text-only, so any
-        # has_images=True call would silently use causal attention. Add a
-        # guard / fallback if/when VLM evals start using ablation.
+        if kwargs.get("has_images", False):
+            raise NotImplementedError("Gemma3 VLM ablation is not supported; this implementation is text-only")
+
         qkv, _ = attn_module.qkv_proj(hidden_states)
         q, k, v = qkv.split([q_size, kv_size, kv_size], dim=-1)
 

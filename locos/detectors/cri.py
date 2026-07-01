@@ -21,21 +21,21 @@ Supports both NIAH and NoLiMa probing datasets via the shared datasets module.
 
 Usage:
     # Quick test
-    python locos/detect_cri.py \\
+    python -m locos.detectors.cri \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --dataset nolima --num-examples 5
 
     # Full CRI detection
-    python locos/detect_cri.py \\
+    python -m locos.detectors.cri \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --dataset nolima --num-examples 200
 
     # With scramble corruption
-    python locos/detect_cri.py \\
+    python -m locos.detectors.cri \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --dataset nolima --corruption scramble
 
-Requires: GPU, transformers (pip install -e ".[dev]")
+Requires: GPU and the project runtime dependencies.
 """
 
 import argparse
@@ -650,11 +650,11 @@ def build_cri_prompt_pair(
         if len(scrambled_tokens) >= needle_len:
             corrupt_span = scrambled_tokens[:needle_len]
         else:
-            # FIXME(aryo): scrambled needle tokenizes shorter than the clean
+            # NOTE: scrambled needle can tokenize shorter than the clean
             # needle (e.g. shorter alternate character name). Right-pad with
             # filler periods so lengths align. Reduces "corruption strength"
             # marginally but preserves the activation-patching invariant.
-            # Consider length-matched substitutions in _make_corrupted_needle.
+            # Padding preserves the activation-patching length invariant.
             filler_id = _get_filler_token_id(tokenizer)
             corrupt_span = scrambled_tokens + [filler_id] * (needle_len - len(scrambled_tokens))
 
@@ -764,7 +764,7 @@ def main():
 
     # Resolve output path. Suffix the file by metric so the two variants can
     # coexist on disk without overwriting each other.
-    # FIXME(aryo): for backward compatibility with the existing
+    # NOTE: for backward compatibility with the existing
     # answer_logprob CRI JSON on HF (aryopg/locos-results), the
     # answer_logprob variant still writes to the historical `{model}_cri.json`
     # path. The new first_token_logit_diff variant gets a
@@ -853,7 +853,7 @@ def main():
     assert head_dim is not None, "Could not determine head_dim"
 
     total_heads = num_layers * num_heads
-    # FIXME: For GQA models, num_heads is the number of Q-heads, not KV-heads.
+    # NOTE: For GQA models, num_heads is the number of Q-heads, not KV-heads.
     # CRI patches at Q-head granularity (the attention output has num_heads
     # dimensions before o_proj), which is correct. But the interpretation is
     # that we measure each Q-head's contribution, not each KV-head group's.

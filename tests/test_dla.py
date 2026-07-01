@@ -46,4 +46,3 @@ def test_compute_dla_per_step_expands_gqa_values():
     )
 
     np.testing.assert_allclose(result, np.array([2.0, 10.5], dtype=np.float32))
-

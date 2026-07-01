@@ -404,7 +404,7 @@ def main():
         default=False,
         help=(
             "Wrap the prompt in the tokenizer's chat template before detection. "
-            "Required for models that need structured prompts (e.g. GPT-oss). "
+            "Required for models that need structured prompts. "
             "Needle positions are re-located after re-tokenization."
         ),
     )
@@ -414,8 +414,7 @@ def main():
         default=None,
         help=(
             "String to append after the prompt (post chat-template if enabled). "
-            "Tokenized and appended to the token sequence before detection. "
-            "E.g. '<|channel|>final<|message|>' for GPT-oss to skip reasoning."
+            "Tokenized and appended to the token sequence before detection."
         ),
     )
     args = parser.parse_args()

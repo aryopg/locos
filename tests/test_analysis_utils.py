@@ -29,10 +29,7 @@ def test_candidate_filenames_rejects_unknown_method():
 
 
 def test_hf_path_uses_canonical_score_filename():
-    assert (
-        _utils._hf_path("Qwen/Qwen3-8B", "locos", "nolima")
-        == "retrieval_heads/Qwen3-8B_logit_contrib_nolima.json"
-    )
+    assert _utils._hf_path("Qwen/Qwen3-8B", "locos", "nolima") == "retrieval_heads/Qwen3-8B_logit_contrib_nolima.json"
 
 
 def test_load_score_file_reads_envelope_format_without_download(tmp_path, monkeypatch):

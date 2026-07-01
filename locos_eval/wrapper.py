@@ -241,7 +241,7 @@ class AblationRPCWrapper:
         if mode not in ABLATION_MODES:
             raise ValueError(f"Unknown ablation mode: {mode!r}. Choose from {ABLATION_MODES}")
         if mode == "mean" and not calibration_prompts:
-            # FIXME: we don't currently support pre-computed mean_activations
+            # NOTE: we don't currently support pre-computed mean_activations
             # under TP>1 because the means must be sharded by local-rank head
             # index, which the orchestrator can't know without first inspecting
             # the worker. Add a from-disk loader (with rank-aware sharding)

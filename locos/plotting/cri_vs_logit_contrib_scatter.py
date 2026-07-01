@@ -164,7 +164,7 @@ def plot(
         )
         cbar.set_label("relative layer depth (0 = early, 1 = late)")
 
-    # FIXME(aryo): per the project plotting convention, titles belong in LaTeX.
+    # NOTE: per the project plotting convention, titles belong in LaTeX.
     # save_figure strips any in-figure titles before saving. We rely on the
     # per-panel annotation for model identity and on the LaTeX caption for
     # the figure-level heading.

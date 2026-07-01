@@ -3,7 +3,7 @@
 
 Measures whether a head's output at needle positions pushes the residual
 stream toward the correct answer token in the unembedding space. Unlike
-the attention-based contrastive method (detect_contrastive.py) which
+the attention-based contrastive detector (`locos.detectors.contrastive`), which
 measures *where a head looks*, this measures *what information it writes*.
 
 For each answer decode step t and head (l, h), the per-position logit
@@ -23,20 +23,20 @@ See the root README and REPRODUCING.md for the public method and artifact guide.
 
 Usage:
     # Quick test with NoLiMa
-    python locos/detect_logit_contrib.py \\
+    python -m locos.detectors.logit_contrib \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --dataset nolima --max-length 4000 --num-lengths 3
 
     # Full detection
-    python locos/detect_logit_contrib.py \\
+    python -m locos.detectors.logit_contrib \\
         --model meta-llama/Meta-Llama-3-8B-Instruct \\
         --dataset nolima --min-length 1000 --max-length 50000
 
     # Resume from checkpoint
-    python locos/detect_logit_contrib.py \\
+    python -m locos.detectors.logit_contrib \\
         --model meta-llama/Meta-Llama-3-8B-Instruct --resume
 
-Requires: GPU, transformers, rouge-score (pip install -e ".[eval]")
+Requires: GPU and the project runtime dependencies.
 """
 
 import argparse
@@ -802,7 +802,7 @@ def detect_single_trial_logit_contrib(
         for layer_idx in range(num_layers):
             # Get V cache for this layer
             # value_states shape: (batch, num_kv_heads, seq_len, head_dim)
-            # FIXME: After decode, past_kv contains the full sequence (prefill + decode).
+            # NOTE: After decode, past_kv contains the full sequence (prefill + decode).
             # The V values at needle positions (in the prefix) are unchanged across
             # decode steps, so using the final V cache is correct for needle positions.
             # However, the attention weights at step t were computed over only the
@@ -944,7 +944,7 @@ def main():
         default=False,
         help=(
             "Wrap the prompt in the tokenizer's chat template before detection. "
-            "Required for models that need structured prompts (e.g. GPT-oss). "
+            "Required for models that need structured prompts. "
             "Needle positions are re-located after re-tokenization."
         ),
     )
@@ -954,8 +954,7 @@ def main():
         default=None,
         help=(
             "String to append after the prompt (post chat-template if enabled). "
-            "Tokenized and appended to the token sequence before detection. "
-            "E.g. '<|channel|>final<|message|>' for GPT-oss to skip reasoning."
+            "Tokenized and appended to the token sequence before detection."
         ),
     )
     parser.add_argument(
