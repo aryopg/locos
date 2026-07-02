@@ -7,6 +7,8 @@ LOCOS is a toolkit for finding attention heads that matter for contextual retrie
 | Resource | Path |
 | --- | --- |
 | Project page | [web/index.html](web/index.html) |
+| Paper | https://arxiv.org/abs/2607.01002 |
+| Results | https://huggingface.co/datasets/aryopg/locos_results |
 | Demo notebook | [notebooks/locos_demo.ipynb](notebooks/locos_demo.ipynb) |
 | Reproducibility guide | [REPRODUCING.md](REPRODUCING.md) |
 | Figure manifest | [experiments/manifest.yaml](experiments/manifest.yaml) |
@@ -367,8 +369,22 @@ tests, artifact download commands, and figure regeneration commands.
 
 ## Citation And License
 
-Preprint citation metadata is in [CITATION.cff](CITATION.cff). Until an arXiv
-identifier is available, cite the repository title and authors from that file.
+If you use this code, please cite LOCOS and PopQA:
+
+```bibtex
+@article{gema2026locos,
+      title={Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads}, 
+      author={Aryo Pradipta Gema and Beatrice Alex and Pasquale Minervini},
+      year={2026},
+      eprint={2607.01002},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2607.01002}, 
+}
+```
+
+Preprint citation metadata is in [CITATION.cff](CITATION.cff). The arXiv
+preprint is available at <https://arxiv.org/abs/2607.01002>.
 
 Source code is MIT licensed; documentation, web text, figures, and non-code
 assets are CC BY 4.0 licensed. See [LICENSE](LICENSE) and

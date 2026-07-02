@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "If you use LOCOS, please cite this software and the accompanying preprint once available."
-title: "Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads"
+message: "If you use LOCOS, please cite the accompanying preprint."
+title: "LOCOS"
 type: software
 authors:
   - family-names: Gema
@@ -14,3 +14,15 @@ license: MIT
 date-released: "2026-06-29"
 version: "0.1.0"
 abstract: "LOCOS identifies retrieval heads by scoring spatially localized OV-path logit contributions and evaluates their causal role with vLLM ablations."
+preferred-citation:
+  type: article
+  title: "Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads"
+  authors:
+    - family-names: Gema
+      given-names: Aryo Pradipta
+    - family-names: Alex
+      given-names: Beatrice
+    - family-names: Minervini
+      given-names: Pasquale
+  year: 2026
+  url: "https://arxiv.org/abs/2607.01002"

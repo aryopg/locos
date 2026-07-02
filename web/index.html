@@ -324,7 +324,7 @@
           </a>
           <a class="link-github" href="https://huggingface.co/datasets/aryopg/locos-results">artifacts</a>
           <a class="link-github" href="https://github.com/aryopg/locos/blob/main/REPRODUCING.md">reproduce</a>
-          <span class="link-disabled" aria-disabled="true">preprint coming</span>
+          <a class="link-arxiv" href="https://arxiv.org/abs/2607.01002">arXiv</a>
         </div>
         <p class="hook">LLMs often retrieve answers by synthesizing meaning, not copying tokens — yet existing retrieval-head detectors only reward literal token matches. LOCOS scores each head by <span class="c-write">what it writes</span> through the OV circuit, not just <span class="c-read">where it attends</span>.</p>
       </div>
@@ -444,11 +444,14 @@
       <h2>Citation</h2>
       <p style="font-size:18px; margin: 0 0 18px;">If you use LOCOS in your research, please cite:</p>
       <div class="citation-block">
-        <pre><code id="bibtex">@misc{gema2026locos,
-  title   = {Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads},
-  author  = {Gema, Aryo Pradipta and Alex, Beatrice and Minervini, Pasquale},
-  year    = {2026},
-  note    = {Preprint forthcoming}
+        <pre><code id="bibtex">@article{gema2026locos,
+      title={Logit-Contribution Scoring Identifies Non-Literal Retrieval Heads}, 
+      author={Aryo Pradipta Gema and Beatrice Alex and Pasquale Minervini},
+      year={2026},
+      eprint={2607.01002},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2607.01002}, 
 }</code></pre>
         <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('bibtex').textContent).then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy'},1500)})">Copy</button>
       </div>
